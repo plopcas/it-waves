@@ -4,9 +4,6 @@ using UnityEngine.UI;
 
 namespace ITWaves.UI
 {
-    /// <summary>
-    /// Controls the in-game HUD display.
-    /// </summary>
     public class HUDController : MonoBehaviour
     {
         [Header("Level Display")]
@@ -75,9 +72,6 @@ namespace ITWaves.UI
             }
         }
         
-        /// <summary>
-        /// Set the level display.
-        /// </summary>
         public void SetLevel(int levelIndex)
         {
             if (levelText != null)
@@ -94,9 +88,6 @@ namespace ITWaves.UI
             }
         }
         
-        /// <summary>
-        /// Set player health display.
-        /// </summary>
         public void SetPlayerHP(int current, int max)
         {
             if (playerHealthText != null)
@@ -110,9 +101,6 @@ namespace ITWaves.UI
             }
         }
         
-        /// <summary>
-        /// Set snake segments display.
-        /// </summary>
         public void SetSnakeHP(int current, int max)
         {
             if (snakeHealthText != null)
@@ -126,9 +114,6 @@ namespace ITWaves.UI
             }
         }
         
-        /// <summary>
-        /// Set score display.
-        /// </summary>
         public void SetScore(int value)
         {
             currentScore = value;
@@ -138,9 +123,6 @@ namespace ITWaves.UI
             }
         }
         
-        /// <summary>
-        /// Add to score.
-        /// </summary>
         public void AddScore(int value)
         {
             SetScore(currentScore + value);

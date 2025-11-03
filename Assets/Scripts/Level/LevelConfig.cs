@@ -2,9 +2,6 @@ using UnityEngine;
 
 namespace ITWaves.Level
 {
-    /// <summary>
-    /// Configuration for a single level.
-    /// </summary>
     [CreateAssetMenu(fileName = "LevelConfig", menuName = "ITWaves/Level Config")]
     public class LevelConfig : ScriptableObject
     {

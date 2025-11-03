@@ -5,9 +5,6 @@ using ITWaves.Systems;
 
 namespace ITWaves.Player
 {
-    /// <summary>
-    /// Manages player health and damage.
-    /// </summary>
     public class PlayerHealth : MonoBehaviour, IDamageable
     {
         [Header("Health Settings")]
@@ -59,9 +56,6 @@ namespace ITWaves.Player
             OnHealthChanged?.Invoke(currentHealth, maxHealth);
         }
         
-        /// <summary>
-        /// Apply damage to the player.
-        /// </summary>
         public void ApplyDamage(float amount, GameObject source = null)
         {
             if (isInvulnerable || !IsAlive)
@@ -139,9 +133,6 @@ namespace ITWaves.Player
             // Optional: play death animation/effect
         }
         
-        /// <summary>
-        /// Heal the player.
-        /// </summary>
         public void Heal(int amount)
         {
             if (!IsAlive)

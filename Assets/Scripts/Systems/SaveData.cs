@@ -2,9 +2,6 @@ using System;
 
 namespace ITWaves.Systems
 {
-    /// <summary>
-    /// Data structure for save game information.
-    /// </summary>
     [Serializable]
     public class SaveData
     {

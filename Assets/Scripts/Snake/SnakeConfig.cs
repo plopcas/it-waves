@@ -2,9 +2,6 @@ using UnityEngine;
 
 namespace ITWaves.Snake
 {
-    /// <summary>
-    /// Configuration for snake behaviour and appearance.
-    /// </summary>
     [CreateAssetMenu(fileName = "SnakeConfig", menuName = "ITWaves/Snake Config")]
     public class SnakeConfig : ScriptableObject
     {

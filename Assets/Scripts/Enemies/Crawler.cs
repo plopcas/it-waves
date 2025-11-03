@@ -6,11 +6,6 @@ using System.Collections.Generic;
 
 namespace ITWaves.Enemies
 {
-    /// <summary>
-    /// Crawler enemy: moves in bursts toward player (center of screen) on grid.
-    /// Randomly chooses diagonal or lateral movement, and varies speed between slow and fast.
-    /// Avoids boxes and snake path.
-    /// </summary>
     public class Crawler : EnemyBase
     {
         [Header("Crawler Settings")]
@@ -172,9 +167,6 @@ namespace ITWaves.Enemies
             stateTimer = pauseDuration;
         }
 
-        /// <summary>
-        /// Check if a move to the given position is valid (not blocked by snake, boxes, or out of bounds).
-        /// </summary>
         private bool IsValidMove(Vector2 worldPos)
         {
             if (GridManager.Instance == null)
@@ -204,9 +196,6 @@ namespace ITWaves.Enemies
             return true;
         }
 
-        /// <summary>
-        /// Check if a grid cell is occupied by the snake.
-        /// </summary>
         private bool IsCellOccupiedBySnake(Vector2 worldPos)
         {
             if (snake == null || GridManager.Instance == null)
@@ -234,9 +223,6 @@ namespace ITWaves.Enemies
             return false;
         }
 
-        /// <summary>
-        /// Check if a grid cell is occupied by boxes or other obstacles.
-        /// </summary>
         private bool IsCellOccupiedByObstacle(Vector2 worldPos)
         {
             if (GridManager.Instance == null)

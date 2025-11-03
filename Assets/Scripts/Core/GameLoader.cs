@@ -3,9 +3,6 @@ using UnityEngine.SceneManagement;
 
 namespace ITWaves.Core
 {
-    /// <summary>
-    /// Handles game initialization and scene loading.
-    /// </summary>
     public class GameLoader : MonoBehaviour
     {
         [Header("Boot Settings")]
@@ -47,10 +44,7 @@ namespace ITWaves.Core
         {
             SceneManager.LoadScene("MainMenu");
         }
-        
-        /// <summary>
-        /// Load game scene with specified level.
-        /// </summary>
+
         public static void LoadGame(int levelIndex)
         {
             PlayerPrefs.SetInt("StartLevel", levelIndex);

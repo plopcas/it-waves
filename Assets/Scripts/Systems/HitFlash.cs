@@ -3,9 +3,6 @@ using UnityEngine;
 
 namespace ITWaves.Systems
 {
-    /// <summary>
-    /// Flashes sprite colour when damaged.
-    /// </summary>
     [RequireComponent(typeof(SpriteRenderer))]
     public class HitFlash : MonoBehaviour
     {
@@ -26,9 +23,6 @@ namespace ITWaves.Systems
             originalColour = spriteRenderer.color;
         }
         
-        /// <summary>
-        /// Trigger a hit flash effect.
-        /// </summary>
         public void Flash()
         {
             if (flashCoroutine != null)

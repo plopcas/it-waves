@@ -8,9 +8,6 @@ using System;
 
 namespace ITWaves
 {
-    /// <summary>
-    /// Orchestrates level flow from init → play → escape/defeat → transition.
-    /// </summary>
     public class LevelManager : MonoBehaviour
     {
         public static LevelManager Instance { get; private set; }
@@ -84,9 +81,6 @@ namespace ITWaves
             }
         }
 
-        /// <summary>
-        /// Start a level run.
-        /// </summary>
         public void StartRun(int levelIndex)
         {
             currentLevel = Mathf.Clamp(levelIndex, 1, 20);
@@ -161,10 +155,6 @@ namespace ITWaves
             // No need to subscribe to health events - snake handles its own lifecycle
         }
 
-        /// <summary>
-        /// Handle snake escaping after all segments destroyed.
-        /// Restarts the wave with increased difficulty (more segments).
-        /// </summary>
         public void HandleSnakeEscaped()
         {
             Debug.Log($"Wave {currentWave} complete! Snake escaped from Level {currentLevel}!");
@@ -191,9 +181,6 @@ namespace ITWaves
             Invoke(nameof(RestartWave), 2f);
         }
 
-        /// <summary>
-        /// Handle snake defeated (level 20).
-        /// </summary>
         public void HandleSnakeDefeated()
         {
             Debug.Log($"Snake defeated on Level {currentLevel}!");
@@ -226,9 +213,6 @@ namespace ITWaves
             }
         }
 
-        /// <summary>
-        /// Handle player death.
-        /// </summary>
         public void HandlePlayerDied()
         {
             Debug.Log("Player died!");
@@ -261,9 +245,6 @@ namespace ITWaves
             Invoke(nameof(LoadGameOverScene), 2f);
         }
 
-        /// <summary>
-        /// Restart the current wave with increased difficulty.
-        /// </summary>
         private void RestartWave()
         {
             Debug.Log($"Starting Wave {currentWave} of Level {currentLevel}");

@@ -2,10 +2,6 @@ using UnityEngine;
 
 namespace ITWaves.Core
 {
-    /// <summary>
-    /// Manages the game grid system. Ensures all entities are placed on a discrete 1x1 grid
-    /// that fits exactly within the camera view with optional margins.
-    /// </summary>
     public class GridManager : MonoBehaviour
     {
         public static GridManager Instance { get; private set; }
@@ -50,10 +46,6 @@ namespace ITWaves.Core
             CalculateGridDimensions();
         }
 
-        /// <summary>
-        /// Calculate grid dimensions based on camera view and margins.
-        /// Ensures the grid fits exactly with whole cells.
-        /// </summary>
         private void CalculateGridDimensions()
         {
             if (mainCamera == null)
@@ -88,9 +80,6 @@ namespace ITWaves.Core
             Debug.Log($"<color=cyan>GridManager: Margin: {margin}, Available space: {availableWidth}x{availableHeight}</color>");
         }
 
-        /// <summary>
-        /// Convert grid coordinates to world position (center of cell).
-        /// </summary>
         public Vector2 GridToWorld(int gridX, int gridY)
         {
             float worldX = gridOrigin.x + (gridX * cellSize) + (cellSize / 2f);
@@ -98,17 +87,11 @@ namespace ITWaves.Core
             return new Vector2(worldX, worldY);
         }
 
-        /// <summary>
-        /// Convert grid coordinates to world position (center of cell).
-        /// </summary>
         public Vector2 GridToWorld(Vector2Int gridPos)
         {
             return GridToWorld(gridPos.x, gridPos.y);
         }
 
-        /// <summary>
-        /// Convert world position to grid coordinates.
-        /// </summary>
         public Vector2Int WorldToGrid(Vector2 worldPos)
         {
             int gridX = Mathf.FloorToInt((worldPos.x - gridOrigin.x) / cellSize);
@@ -116,58 +99,37 @@ namespace ITWaves.Core
             return new Vector2Int(gridX, gridY);
         }
 
-        /// <summary>
-        /// Snap world position to nearest grid cell center.
-        /// </summary>
         public Vector2 SnapToGrid(Vector2 worldPos)
         {
             Vector2Int gridPos = WorldToGrid(worldPos);
             return GridToWorld(gridPos);
         }
 
-        /// <summary>
-        /// Check if grid coordinates are within bounds.
-        /// </summary>
         public bool IsValidGridPosition(int gridX, int gridY)
         {
             return gridX >= 0 && gridX < gridWidth && gridY >= 0 && gridY < gridHeight;
         }
 
-        /// <summary>
-        /// Check if grid coordinates are within bounds.
-        /// </summary>
         public bool IsValidGridPosition(Vector2Int gridPos)
         {
             return IsValidGridPosition(gridPos.x, gridPos.y);
         }
 
-        /// <summary>
-        /// Check if grid coordinates are on the edge of the grid.
-        /// </summary>
         public bool IsEdgePosition(int gridX, int gridY)
         {
             return gridX == 0 || gridX == gridWidth - 1 || gridY == 0 || gridY == gridHeight - 1;
         }
 
-        /// <summary>
-        /// Check if grid coordinates are on the edge of the grid.
-        /// </summary>
         public bool IsEdgePosition(Vector2Int gridPos)
         {
             return IsEdgePosition(gridPos.x, gridPos.y);
         }
 
-        /// <summary>
-        /// Get a random grid position.
-        /// </summary>
         public Vector2Int GetRandomGridPosition()
         {
             return new Vector2Int(Random.Range(0, gridWidth), Random.Range(0, gridHeight));
         }
 
-        /// <summary>
-        /// Get a random grid position on the edge of the grid.
-        /// </summary>
         public Vector2Int GetRandomEdgeGridPosition()
         {
             int edge = Random.Range(0, 4);
@@ -187,18 +149,12 @@ namespace ITWaves.Core
             }
         }
 
-        /// <summary>
-        /// Get a random world position on the edge of the grid.
-        /// </summary>
         public Vector2 GetRandomEdgeWorldPosition()
         {
             Vector2Int gridPos = GetRandomEdgeGridPosition();
             return GridToWorld(gridPos);
         }
 
-        /// <summary>
-        /// Check if a grid cell is occupied by checking for colliders.
-        /// </summary>
         public bool IsGridCellOccupied(int gridX, int gridY, LayerMask layerMask)
         {
             Vector2 worldPos = GridToWorld(gridX, gridY);
@@ -206,17 +162,11 @@ namespace ITWaves.Core
             return hit != null;
         }
 
-        /// <summary>
-        /// Check if a grid cell is occupied by checking for colliders.
-        /// </summary>
         public bool IsGridCellOccupied(Vector2Int gridPos, LayerMask layerMask)
         {
             return IsGridCellOccupied(gridPos.x, gridPos.y, layerMask);
         }
 
-        /// <summary>
-        /// Get an empty edge grid position (not occupied by anything).
-        /// </summary>
         public Vector2Int GetEmptyEdgeGridPosition(LayerMask obstacleMask, int maxAttempts = 20)
         {
             for (int i = 0; i < maxAttempts; i++)
@@ -232,18 +182,12 @@ namespace ITWaves.Core
             return GetRandomEdgeGridPosition();
         }
 
-        /// <summary>
-        /// Get an empty edge world position (not occupied by anything).
-        /// </summary>
         public Vector2 GetEmptyEdgeWorldPosition(LayerMask obstacleMask, int maxAttempts = 20)
         {
             Vector2Int gridPos = GetEmptyEdgeGridPosition(obstacleMask, maxAttempts);
             return GridToWorld(gridPos);
         }
 
-        /// <summary>
-        /// Draw grid gizmos for debugging.
-        /// </summary>
         private void OnDrawGizmos()
         {
             if (gridWidth == 0 || gridHeight == 0)

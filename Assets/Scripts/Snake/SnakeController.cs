@@ -7,9 +7,6 @@ using ITWaves.Core;
 
 namespace ITWaves.Snake
 {
-    /// <summary>
-    /// Controls snake head movement with grid-based Centipede-style movement.
-    /// </summary>
     [RequireComponent(typeof(Rigidbody2D))]
     public class SnakeController : MonoBehaviour, IDamageable
     {
@@ -43,19 +40,11 @@ namespace ITWaves.Snake
         public int SegmentCount => segments.Count;
         public bool IsVisible => isVisible;
 
-        /// <summary>
-        /// Get all grid positions the snake has occupied in the current level.
-        /// Used by enemies to avoid spawning in or moving through snake-occupied cells.
-        /// </summary>
         public IReadOnlyList<Vector2> GetOccupiedCells()
         {
             return pathHistory;
         }
 
-        /// <summary>
-        /// Get the position a segment should be at based on its index.
-        /// Segment 0 follows the head, segment 1 follows segment 0, etc.
-        /// </summary>
         public Vector2 GetSegmentTargetPosition(int segmentIndex)
         {
             // Position history stores all positions the head has been at
@@ -114,9 +103,6 @@ namespace ITWaves.Snake
             Debug.Log($"Snake head spawned at {currentGridPos}, direction: {horizontalDirection}, segments: {segments.Count}");
         }
         
-        /// <summary>
-        /// Initialize snake with configuration and difficulty.
-        /// </summary>
         public void Initialise(SnakeConfig cfg, LevelDifficultyProfile difficulty, int levelIndex)
         {
             config = cfg;
@@ -151,9 +137,6 @@ namespace ITWaves.Snake
 
 
         
-        /// <summary>
-        /// Add a segment to the snake and initialize its position in history.
-        /// </summary>
         public void AddSegment(SnakeSegment segment)
         {
             if (segment != null)
@@ -164,9 +147,6 @@ namespace ITWaves.Snake
             }
         }
 
-        /// <summary>
-        /// Get the initial movement direction (for spawning segments behind the head).
-        /// </summary>
         public Vector2 GetInitialDirection()
         {
             return horizontalDirection;
@@ -424,9 +404,6 @@ namespace ITWaves.Snake
             Debug.Log($"Snake starting from edge {edge}: horizontal={horizontalDirection}, vertical={verticalDirection}");
         }
 
-        /// <summary>
-        /// Apply damage to the snake - destroys tail segment.
-        /// </summary>
         public void ApplyDamage(float amount, GameObject source = null)
         {
             if (!IsAlive || !isVisible)
@@ -459,9 +436,6 @@ namespace ITWaves.Snake
             }
         }
 
-        /// <summary>
-        /// Called when the snake successfully escapes after retreating.
-        /// </summary>
         private void OnSnakeEscaped()
         {
             Debug.Log("Snake escaped! Wave complete!");

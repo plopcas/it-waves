@@ -6,10 +6,6 @@ using System.Collections.Generic;
 
 namespace ITWaves.Enemies
 {
-    /// <summary>
-    /// Skitterer enemy: moves at constant medium speed with zig-zag pattern toward player (center of screen).
-    /// Avoids snake-occupied cells and boxes.
-    /// </summary>
     public class Skitterer : EnemyBase
     {
         [Header("Skitterer Settings")]
@@ -91,9 +87,6 @@ namespace ITWaves.Enemies
             transform.position = currentGridPos;
         }
 
-        /// <summary>
-        /// Calculate primary and alternate directions for zig-zag pattern toward player.
-        /// </summary>
         private void CalculateZigZagDirections()
         {
             // Always move toward center of screen (where player is)
@@ -134,18 +127,12 @@ namespace ITWaves.Enemies
             currentDirection = movingPrimary ? primaryDirection : alternateDirection;
         }
 
-        /// <summary>
-        /// Toggle between primary and alternate direction for zig-zag movement.
-        /// </summary>
         private void ToggleZigZag()
         {
             movingPrimary = !movingPrimary;
             currentDirection = movingPrimary ? primaryDirection : alternateDirection;
         }
 
-        /// <summary>
-        /// Check if a move to the given position is valid (not blocked by snake, boxes, or out of bounds).
-        /// </summary>
         private bool IsValidMove(Vector2 worldPos)
         {
             if (GridManager.Instance == null)
@@ -175,9 +162,6 @@ namespace ITWaves.Enemies
             return true;
         }
 
-        /// <summary>
-        /// Check if a grid cell is occupied by the snake.
-        /// </summary>
         private bool IsCellOccupiedBySnake(Vector2 worldPos)
         {
             if (snake == null || GridManager.Instance == null)
@@ -205,9 +189,6 @@ namespace ITWaves.Enemies
             return false;
         }
 
-        /// <summary>
-        /// Check if a grid cell is occupied by boxes or other obstacles.
-        /// </summary>
         private bool IsCellOccupiedByObstacle(Vector2 worldPos)
         {
             if (GridManager.Instance == null)

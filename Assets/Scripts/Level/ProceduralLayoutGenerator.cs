@@ -4,10 +4,6 @@ using ITWaves.Core;
 
 namespace ITWaves.Level
 {
-    /// <summary>
-    /// Generates procedural arena layouts with boxes and spawn points.
-    /// Uses GridManager for precise grid-based placement.
-    /// </summary>
     public class ProceduralLayoutGenerator : MonoBehaviour
     {
         [Header("References")]
@@ -21,9 +17,6 @@ namespace ITWaves.Level
         private List<GameObject> spawnedBoxes = new List<GameObject>();
         private System.Random rng;
         
-        /// <summary>
-        /// Generate a new layout for the given level.
-        /// </summary>
         public void Generate(LevelConfig config, LevelDifficultyProfile difficulty, int levelIndex)
         {
             // Clear previous layout
@@ -118,9 +111,6 @@ namespace ITWaves.Level
             }
         }
         
-        /// <summary>
-        /// Clear all spawned objects.
-        /// </summary>
         public void ClearLayout()
         {
             foreach (var box in spawnedBoxes)
@@ -133,9 +123,6 @@ namespace ITWaves.Level
             spawnedBoxes.Clear();
         }
         
-        /// <summary>
-        /// Get a random spawn position on the edge of the arena (grid-based).
-        /// </summary>
         public Vector2 GetRandomEdgeSpawnPosition(LevelConfig config)
         {
             if (rng == null)

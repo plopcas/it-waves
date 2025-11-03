@@ -5,10 +5,6 @@ using ITWaves.Core;
 
 namespace ITWaves.Snake
 {
-    /// <summary>
-    /// Spawns and configures the snake for a level.
-    /// Uses GridManager for precise grid-based placement.
-    /// </summary>
     public class SnakeSpawner : MonoBehaviour
     {
         [Header("Prefabs")]
@@ -28,9 +24,6 @@ namespace ITWaves.Snake
         [SerializeField, Tooltip("Level config for arena bounds.")]
         private LevelConfig levelConfig;
 
-        /// <summary>
-        /// Spawn a snake for the given level.
-        /// </summary>
         public SnakeController Spawn(Vector2 position, int levelIndex)
         {
             if (difficultyProfile == null)
@@ -43,9 +36,6 @@ namespace ITWaves.Snake
             return SpawnWithSegmentCount(position, levelIndex, segmentCount);
         }
 
-        /// <summary>
-        /// Spawn a snake with a specific segment count (for wave progression).
-        /// </summary>
         public SnakeController SpawnWithSegmentCount(Vector2 position, int levelIndex, int segmentCount)
         {
             if (snakeHeadPrefab == null)
@@ -121,10 +111,6 @@ namespace ITWaves.Snake
             return GridManager.Instance.GetRandomEdgeWorldPosition();
         }
 
-        /// <summary>
-        /// Determine the outward direction based on which edge the position is on.
-        /// Top edge -> up, Bottom edge -> down, Left edge -> left, Right edge -> right.
-        /// </summary>
         private Vector2 DetermineOutwardDirection(Vector2 position)
         {
             if (GridManager.Instance == null || levelConfig == null)
@@ -154,9 +140,6 @@ namespace ITWaves.Snake
                 return Vector2.right;
         }
 
-        /// <summary>
-        /// Spawn segments in a straight line behind the head in the outward direction.
-        /// </summary>
         private void SpawnSegments(SnakeController controller, Vector2 startPosition, int count, Vector2 outwardDirection)
         {
             if (snakeSegmentPrefab == null)

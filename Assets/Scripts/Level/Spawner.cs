@@ -5,9 +5,6 @@ using ITWaves.Snake;
 
 namespace ITWaves.Level
 {
-    /// <summary>
-    /// Generic spawner with rate limiting and caps.
-    /// </summary>
     public class Spawner : MonoBehaviour
     {
         [Header("Spawn Settings")]
@@ -38,9 +35,6 @@ namespace ITWaves.Level
         private bool isSpawning;
         private int currentLevel = 1;
         
-        /// <summary>
-        /// Start spawning.
-        /// </summary>
         public void StartSpawning()
         {
             isSpawning = true;
@@ -48,33 +42,21 @@ namespace ITWaves.Level
             nextSpawnTime = Time.time + (1f / spawnRate);
         }
 
-        /// <summary>
-        /// Set the current level for enemy initialization.
-        /// </summary>
         public void SetLevel(int level)
         {
             currentLevel = level;
         }
         
-        /// <summary>
-        /// Stop spawning.
-        /// </summary>
         public void StopSpawning()
         {
             isSpawning = false;
         }
         
-        /// <summary>
-        /// Set spawn rate.
-        /// </summary>
         public void SetSpawnRate(float rate)
         {
             spawnRate = rate;
         }
         
-        /// <summary>
-        /// Set maximum active objects.
-        /// </summary>
         public void SetMaxActive(int max)
         {
             maxActive = max;
@@ -135,9 +117,6 @@ namespace ITWaves.Level
             }
         }
 
-        /// <summary>
-        /// Get a safe edge spawn position that avoids snake-occupied cells.
-        /// </summary>
         private Vector2 GetSafeEdgeSpawnPosition()
         {
             if (GridManager.Instance == null)
@@ -186,9 +165,6 @@ namespace ITWaves.Level
             return GridManager.Instance.GetRandomEdgeWorldPosition();
         }
         
-        /// <summary>
-        /// Clear all active spawned objects.
-        /// </summary>
         public void ClearAll()
         {
             foreach (var obj in activeObjects)

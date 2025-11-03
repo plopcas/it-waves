@@ -3,9 +3,6 @@ using ITWaves.Systems;
 
 namespace ITWaves.Props
 {
-    /// <summary>
-    /// Destructible box obstacle (Centipede mushroom homage).
-    /// </summary>
     [RequireComponent(typeof(Collider2D))]
     public class Box : MonoBehaviour, IDamageable
     {
@@ -53,9 +50,6 @@ namespace ITWaves.Props
             UpdateVisual();
         }
         
-        /// <summary>
-        /// Apply damage to the box.
-        /// </summary>
         public void ApplyDamage(float amount, GameObject source = null)
         {
             if (!IsAlive)
@@ -67,9 +61,6 @@ namespace ITWaves.Props
             ApplyDamage(hits);
         }
         
-        /// <summary>
-        /// Apply damage by hit count.
-        /// </summary>
         public void ApplyDamage(int hits = 1)
         {
             if (!IsAlive)

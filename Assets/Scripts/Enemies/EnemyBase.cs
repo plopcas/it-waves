@@ -3,11 +3,6 @@ using ITWaves.Level;
 
 namespace ITWaves.Enemies
 {
-    /// <summary>
-    /// Base class for enemy behaviour.
-    /// Enemies always move toward the player (center of screen) and kill on contact.
-    /// Movement is discrete, snapping from grid cell to grid cell like the snake.
-    /// </summary>
     [RequireComponent(typeof(Rigidbody2D))]
     public abstract class EnemyBase : MonoBehaviour
     {
@@ -30,9 +25,6 @@ namespace ITWaves.Enemies
             }
         }
         
-        /// <summary>
-        /// Initialize enemy with difficulty settings.
-        /// </summary>
         public virtual void Initialise(LevelDifficultyProfile difficulty, int levelIndex)
         {
             isInitialised = true;
@@ -49,9 +41,6 @@ namespace ITWaves.Enemies
             UpdateBehaviour();
         }
         
-        /// <summary>
-        /// Update enemy behaviour (override in derived classes).
-        /// </summary>
         protected abstract void UpdateBehaviour();
 
         protected virtual void OnCollisionEnter2D(Collision2D collision)

@@ -2,9 +2,6 @@ using UnityEngine;
 
 namespace ITWaves.Level
 {
-    /// <summary>
-    /// Defines difficulty scaling across all 20 levels.
-    /// </summary>
     [CreateAssetMenu(fileName = "LevelDifficultyProfile", menuName = "ITWaves/Level Difficulty Profile")]
     public class LevelDifficultyProfile : ScriptableObject
     {
@@ -41,57 +38,36 @@ namespace ITWaves.Level
         [SerializeField, Tooltip("Box health (hits to destroy).")]
         public int boxHealth = 3;
 
-        /// <summary>
-        /// Get snake segment count for a given level.
-        /// </summary>
         public int GetSnakeSegments(int level)
         {
             return snakeBaseSegments + (level - 1) / snakeSegmentsPerLevels;
         }
 
-        /// <summary>
-        /// Get snake speed for a given level.
-        /// </summary>
         public float GetSnakeSpeed(int level)
         {
             return snakeSpeedCurve.Evaluate(level);
         }
         
-        /// <summary>
-        /// Get enemy spawn rate for a given level.
-        /// </summary>
         public float GetEnemySpawnRate(int level)
         {
             return enemySpawnRateCurve.Evaluate(level);
         }
         
-        /// <summary>
-        /// Get maximum active enemies for a given level.
-        /// </summary>
         public int GetEnemyCap(int level)
         {
             return Mathf.RoundToInt(enemyCapCurve.Evaluate(level));
         }
         
-        /// <summary>
-        /// Get box density for a given level.
-        /// </summary>
         public float GetBoxDensity(int level)
         {
             return boxDensityCurve.Evaluate(level);
         }
         
-        /// <summary>
-        /// Get box spawn chance on snake hit for a given level.
-        /// </summary>
         public float GetBoxSpawnChance(int level)
         {
             return boxSpawnOnHitCurve.Evaluate(level);
         }
         
-        /// <summary>
-        /// Get enemy type weights for a given level.
-        /// </summary>
         public void GetEnemyWeights(int level, out float crawlerWeight, out float skittererWeight)
         {
             crawlerWeight = crawlerWeightCurve.Evaluate(level);

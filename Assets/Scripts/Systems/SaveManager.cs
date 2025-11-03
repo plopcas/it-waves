@@ -4,9 +4,6 @@ using UnityEngine;
 
 namespace ITWaves.Systems
 {
-    /// <summary>
-    /// Manages save and load operations with integrity checking.
-    /// </summary>
     public static class SaveManager
     {
         private const string SAVE_FILE_NAME = "savegame.json";
@@ -17,17 +14,11 @@ namespace ITWaves.Systems
         
         private static SaveData cachedSaveData;
         
-        /// <summary>
-        /// Check if a save file exists.
-        /// </summary>
         public static bool HasSave()
         {
             return File.Exists(SaveFilePath) && File.Exists(HashFilePath);
         }
         
-        /// <summary>
-        /// Load save data from disk.
-        /// </summary>
         public static SaveData Load()
         {
             if (!HasSave())
@@ -62,9 +53,6 @@ namespace ITWaves.Systems
             }
         }
         
-        /// <summary>
-        /// Save data to disk with integrity hash.
-        /// </summary>
         public static void Save(SaveData data)
         {
             try
@@ -84,9 +72,6 @@ namespace ITWaves.Systems
             }
         }
         
-        /// <summary>
-        /// Get the highest level reached from save data.
-        /// </summary>
         public static int GetHighestLevelReached()
         {
             if (cachedSaveData == null)
@@ -96,9 +81,6 @@ namespace ITWaves.Systems
             return cachedSaveData.highestLevelReached;
         }
         
-        /// <summary>
-        /// Update the highest level reached if new level is higher.
-        /// </summary>
         public static void UpdateHighestLevel(int level)
         {
             if (cachedSaveData == null)
@@ -113,9 +95,6 @@ namespace ITWaves.Systems
             }
         }
         
-        /// <summary>
-        /// Delete save file.
-        /// </summary>
         public static void DeleteSave()
         {
             try

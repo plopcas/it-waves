@@ -2,9 +2,6 @@ using UnityEngine;
 
 namespace ITWaves.Systems
 {
-    /// <summary>
-    /// Projectile that damages entities on contact.
-    /// </summary>
     [RequireComponent(typeof(Rigidbody2D), typeof(Collider2D))]
     public class Bullet : MonoBehaviour
     {
@@ -68,9 +65,6 @@ namespace ITWaves.Systems
             }
         }
         
-        /// <summary>
-        /// Launch the bullet in a direction.
-        /// </summary>
         public void Launch(Vector2 direction)
         {
             Debug.Log($"[Bullet] Launch called on {gameObject.name}, direction: {direction}, rb null: {rb == null}");

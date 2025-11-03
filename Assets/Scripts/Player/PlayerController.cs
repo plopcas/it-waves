@@ -3,9 +3,6 @@ using UnityEngine.InputSystem;
 
 namespace ITWaves.Player
 {
-    /// <summary>
-    /// Handles player aiming. Player is stationary at the center, frozen in fear.
-    /// </summary>
     public class PlayerController : MonoBehaviour
     {
         [Header("Input")]
@@ -24,9 +21,6 @@ namespace ITWaves.Player
             aimDirection = Vector2.right;
         }
 
-        /// <summary>
-        /// Handle look input from Input System.
-        /// </summary>
         public void OnLook(InputValue value)
         {
             aimInput = value.Get<Vector2>();

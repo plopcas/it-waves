@@ -4,9 +4,6 @@ using ITWaves.Systems;
 
 namespace ITWaves.Enemies
 {
-    /// <summary>
-    /// Manages enemy health and death.
-    /// </summary>
     public class EnemyHealth : MonoBehaviour, IDamageable
     {
         [Header("Health Settings")]
@@ -33,9 +30,6 @@ namespace ITWaves.Enemies
             hitFlash = GetComponent<HitFlash>();
         }
         
-        /// <summary>
-        /// Apply damage to the enemy.
-        /// </summary>
         public void ApplyDamage(float amount, GameObject source = null)
         {
             if (!IsAlive)
@@ -72,9 +66,6 @@ namespace ITWaves.Enemies
             Destroy(gameObject);
         }
         
-        /// <summary>
-        /// Reset health (for pooling).
-        /// </summary>
         public void ResetHealth()
         {
             currentHealth = maxHealth;

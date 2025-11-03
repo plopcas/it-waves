@@ -3,9 +3,6 @@ using ITWaves.Systems;
 
 namespace ITWaves.Snake
 {
-    /// <summary>
-    /// Individual snake segment that follows the previous segment.
-    /// </summary>
     [RequireComponent(typeof(Rigidbody2D), typeof(Collider2D))]
     public class SnakeSegment : MonoBehaviour, IDamageable
     {
@@ -27,9 +24,6 @@ namespace ITWaves.Snake
             hitFlash = GetComponent<HitFlash>();
         }
 
-        /// <summary>
-        /// Set the snake controller (head) and segment index.
-        /// </summary>
         public void SetSnakeController(SnakeController controller, int index)
         {
             snakeController = controller;
@@ -64,9 +58,6 @@ namespace ITWaves.Snake
             }
         }
         
-        /// <summary>
-        /// Apply damage to the snake (passes to controller).
-        /// </summary>
         public void ApplyDamage(float amount, GameObject source = null)
         {
             if (snakeController != null)

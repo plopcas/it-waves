@@ -4,9 +4,6 @@ using ITWaves.Systems;
 
 namespace ITWaves.Player
 {
-    /// <summary>
-    /// Handles player shooting mechanics.
-    /// </summary>
     public class PlayerShooter : MonoBehaviour
     {
         [Header("Shooting Settings")]
@@ -38,9 +35,6 @@ namespace ITWaves.Player
             audioSource = GetComponent<AudioSource>();
         }
         
-        /// <summary>
-        /// Handle fire input from Input System.
-        /// </summary>
         public void OnAttack(InputValue value)
         {
             // Check if button was just pressed
@@ -81,9 +75,6 @@ namespace ITWaves.Player
             }
         }
         
-        /// <summary>
-        /// Handle firing logic.
-        /// </summary>
         public void HandleFire(bool pressed)
         {
             if (!pressed || Time.time < nextFireTime)

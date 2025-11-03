@@ -3,9 +3,6 @@ using UnityEngine;
 
 namespace ITWaves.Core
 {
-    /// <summary>
-    /// Manages global game state and score.
-    /// </summary>
     public class GameManager : MonoBehaviour
     {
         private static GameManager instance;
@@ -46,10 +43,7 @@ namespace ITWaves.Core
                 LevelManager.Instance.OnLevelStarted += HandleLevelStarted;
             }
         }
-        
-        /// <summary>
-        /// Add score.
-        /// </summary>
+
         public void AddScore(int amount)
         {
             currentScore += amount;
@@ -62,28 +56,19 @@ namespace ITWaves.Core
                 hud.SetScore(currentScore);
             }
         }
-        
-        /// <summary>
-        /// Reset score.
-        /// </summary>
+
         public void ResetScore()
         {
             currentScore = 0;
             OnScoreChanged?.Invoke(currentScore);
         }
-        
-        /// <summary>
-        /// Set current level.
-        /// </summary>
+
         public void SetLevel(int level)
         {
             currentLevel = level;
             OnLevelChanged?.Invoke(currentLevel);
         }
-        
-        /// <summary>
-        /// Reset game state for new run.
-        /// </summary>
+
         public void ResetGameState()
         {
             currentScore = 0;
@@ -91,10 +76,7 @@ namespace ITWaves.Core
             OnScoreChanged?.Invoke(currentScore);
             OnLevelChanged?.Invoke(currentLevel);
         }
-        
-        /// <summary>
-        /// Save final score to PlayerPrefs.
-        /// </summary>
+
         public void SaveFinalScore()
         {
             PlayerPrefs.SetInt("FinalScore", currentScore);

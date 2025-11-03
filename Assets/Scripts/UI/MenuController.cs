@@ -6,9 +6,6 @@ using ITWaves.Systems;
 
 namespace ITWaves.UI
 {
-    /// <summary>
-    /// Controls the main menu.
-    /// </summary>
     public class MenuController : MonoBehaviour
     {
         [Header("Buttons")]
