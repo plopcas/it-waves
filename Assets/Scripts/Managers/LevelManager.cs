@@ -42,16 +42,21 @@ namespace ITWaves
         [SerializeField, Tooltip("Is level currently active.")]
         private bool isLevelActive;
 
+        [SerializeField, Tooltip("Current wave number within the level.")]
+        private int currentWave = 1;
+
         private GameObject currentPlayer;
         private SnakeController currentSnake;
 
         public int CurrentLevel => currentLevel;
         public bool IsLevelActive => isLevelActive;
+        public int CurrentWave => currentWave;
 
         // Events
         public event Action<int> OnLevelStarted;
         public event Action<int> OnLevelCompleted;
         public event Action OnPlayerDied;
+        public event Action<int, int> OnWaveStarted; // (level, wave)
 
         private void Awake()
         {
@@ -85,9 +90,10 @@ namespace ITWaves
         public void StartRun(int levelIndex)
         {
             currentLevel = Mathf.Clamp(levelIndex, 1, 20);
+            currentWave = 1; // Reset wave counter when starting a new level
             isLevelActive = true;
 
-            Debug.Log($"Starting Level {currentLevel}");
+            Debug.Log($"Starting Level {currentLevel}, Wave {currentWave}");
 
             // Generate layout
             if (layoutGenerator != null && levelConfig != null && difficultyProfile != null)
@@ -145,22 +151,27 @@ namespace ITWaves
                 ? layoutGenerator.GetRandomEdgeSpawnPosition(levelConfig)
                 : new Vector2(10f, 10f);
 
-            currentSnake = snakeSpawner.Spawn(spawnPos, currentLevel);
+            // Calculate segment count: base segments for level + (wave - 1) additional segments
+            int baseSegments = difficultyProfile.GetSnakeSegments(currentLevel);
+            int segmentCount = baseSegments + (currentWave - 1);
+
+            currentSnake = snakeSpawner.SpawnWithSegmentCount(spawnPos, currentLevel, segmentCount);
 
             // Snake now uses segment-based damage system
             // No need to subscribe to health events - snake handles its own lifecycle
         }
 
         /// <summary>
-        /// Handle snake escaping (levels 1-19).
+        /// Handle snake escaping after all segments destroyed.
+        /// Restarts the wave with increased difficulty (more segments).
         /// </summary>
         public void HandleSnakeEscaped()
         {
-            Debug.Log($"Snake escaped from Level {currentLevel}!");
+            Debug.Log($"Wave {currentWave} complete! Snake escaped from Level {currentLevel}!");
 
             isLevelActive = false;
 
-            // Stop spawning
+            // Clear enemies
             if (enemySpawner != null)
             {
                 enemySpawner.StopSpawning();
@@ -173,16 +184,11 @@ namespace ITWaves
                 layoutGenerator.ClearLayout();
             }
 
-            // Update save data
-            SaveManager.UpdateHighestLevel(currentLevel + 1);
+            // Increment wave counter
+            currentWave++;
 
-            OnLevelCompleted?.Invoke(currentLevel);
-
-            // Load next level
-            if (currentLevel < 20)
-            {
-                Invoke(nameof(LoadNextLevel), 2f);
-            }
+            // Restart the wave with increased difficulty
+            Invoke(nameof(RestartWave), 2f);
         }
 
         /// <summary>
@@ -253,6 +259,37 @@ namespace ITWaves
 
             // Load game over scene
             Invoke(nameof(LoadGameOverScene), 2f);
+        }
+
+        /// <summary>
+        /// Restart the current wave with increased difficulty.
+        /// </summary>
+        private void RestartWave()
+        {
+            Debug.Log($"Starting Wave {currentWave} of Level {currentLevel}");
+
+            isLevelActive = true;
+
+            // Regenerate layout
+            if (layoutGenerator != null && levelConfig != null && difficultyProfile != null)
+            {
+                layoutGenerator.Generate(levelConfig, difficultyProfile, currentLevel);
+            }
+
+            // Spawn new snake with more segments
+            SpawnSnake();
+
+            // Restart enemy spawning
+            if (enemySpawner != null && difficultyProfile != null)
+            {
+                enemySpawner.SetLevel(currentLevel);
+                enemySpawner.SetSpawnRate(difficultyProfile.GetEnemySpawnRate(currentLevel));
+                enemySpawner.SetMaxActive(difficultyProfile.GetEnemyCap(currentLevel));
+                enemySpawner.StartSpawning();
+            }
+
+            // Notify listeners that a new wave has started
+            OnWaveStarted?.Invoke(currentLevel, currentWave);
         }
 
         private void LoadNextLevel()

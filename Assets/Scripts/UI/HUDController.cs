@@ -39,8 +39,9 @@ namespace ITWaves.UI
             if (LevelManager.Instance != null)
             {
                 LevelManager.Instance.OnLevelStarted += HandleLevelStarted;
+                LevelManager.Instance.OnWaveStarted += HandleWaveStarted;
             }
-            
+
             // Find player and snake
             FindAndSubscribeToPlayer();
             FindAndSubscribeToSnake();
@@ -81,7 +82,15 @@ namespace ITWaves.UI
         {
             if (levelText != null)
             {
-                levelText.text = $"Level {levelIndex}";
+                // Check if we're in a wave-based level
+                if (LevelManager.Instance != null && LevelManager.Instance.CurrentWave > 1)
+                {
+                    levelText.text = $"Level {levelIndex} - Wave {LevelManager.Instance.CurrentWave}";
+                }
+                else
+                {
+                    levelText.text = $"Level {levelIndex}";
+                }
             }
         }
         
@@ -140,22 +149,31 @@ namespace ITWaves.UI
         private void HandleLevelStarted(int levelIndex)
         {
             SetLevel(levelIndex);
-            
+
             // Re-find player and snake for new level
             Invoke(nameof(FindAndSubscribeToPlayer), 0.1f);
             Invoke(nameof(FindAndSubscribeToSnake), 0.1f);
         }
-        
+
+        private void HandleWaveStarted(int levelIndex, int waveNumber)
+        {
+            SetLevel(levelIndex);
+
+            // Re-find snake for new wave
+            Invoke(nameof(FindAndSubscribeToSnake), 0.1f);
+        }
+
         private void HandlePlayerHealthChanged(int current, int max)
         {
             SetPlayerHP(current, max);
         }
-        
+
         private void OnDestroy()
         {
             if (LevelManager.Instance != null)
             {
                 LevelManager.Instance.OnLevelStarted -= HandleLevelStarted;
+                LevelManager.Instance.OnWaveStarted -= HandleWaveStarted;
             }
         }
     }

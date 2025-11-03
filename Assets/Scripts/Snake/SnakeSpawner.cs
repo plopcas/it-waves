@@ -33,6 +33,21 @@ namespace ITWaves.Snake
         /// </summary>
         public SnakeController Spawn(Vector2 position, int levelIndex)
         {
+            if (difficultyProfile == null)
+            {
+                Debug.LogError("Difficulty profile not assigned!");
+                return null;
+            }
+
+            int segmentCount = difficultyProfile.GetSnakeSegments(levelIndex);
+            return SpawnWithSegmentCount(position, levelIndex, segmentCount);
+        }
+
+        /// <summary>
+        /// Spawn a snake with a specific segment count (for wave progression).
+        /// </summary>
+        public SnakeController SpawnWithSegmentCount(Vector2 position, int levelIndex, int segmentCount)
+        {
             if (snakeHeadPrefab == null)
             {
                 Debug.LogError("Snake head prefab not assigned!");
@@ -70,10 +85,8 @@ namespace ITWaves.Snake
             // Initialize controller
             controller.Initialise(snakeConfig, difficultyProfile, levelIndex);
 
-            // Spawn segments
-            int segmentCount = difficultyProfile != null
-                ? difficultyProfile.GetSnakeSegments(levelIndex)
-                : (snakeConfig != null ? snakeConfig.baseSegmentCount : 10);
+            // Use provided segment count
+            Debug.Log($"Spawning snake with {segmentCount} segments for level {levelIndex}");
 
             // Determine which edge the head is on and spawn segments outward
             Vector2 outwardDirection = DetermineOutwardDirection(snappedPosition);

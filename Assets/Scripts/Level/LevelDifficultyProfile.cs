@@ -9,30 +9,14 @@ namespace ITWaves.Level
     public class LevelDifficultyProfile : ScriptableObject
     {
         [Header("Snake Difficulty")]
-        [SerializeField, Tooltip("Snake base HP at level 1.")]
-        public float snakeBaseHP = 100f;
-        
-        [SerializeField, Tooltip("HP multiplier per level.")]
-        public float snakeHPMultiplier = 0.15f;
-        
-        [SerializeField, Tooltip("Base segment count.")]
+        [SerializeField, Tooltip("Base segment count at level 1.")]
         public int snakeBaseSegments = 10;
-        
+
         [SerializeField, Tooltip("Additional segments every N levels.")]
         public int snakeSegmentsPerLevels = 3;
-        
+
         [SerializeField, Tooltip("Snake head speed curve (level 1-20).")]
         public AnimationCurve snakeSpeedCurve = AnimationCurve.Linear(1f, 3f, 20f, 6f);
-        
-        [SerializeField, Tooltip("Wave amplitude curve.")]
-        public AnimationCurve snakeAmplitudeCurve = AnimationCurve.Linear(1f, 0.6f, 20f, 1.2f);
-        
-        [SerializeField, Tooltip("Wave frequency curve.")]
-        public AnimationCurve snakeFrequencyCurve = AnimationCurve.Linear(1f, 0.9f, 20f, 1.4f);
-        
-        [SerializeField, Tooltip("Escape health threshold (percentage).")]
-        [Range(0f, 1f)]
-        public float snakeEscapeThreshold = 0.15f;
         
         [Header("Enemy Difficulty")]
         [SerializeField, Tooltip("Enemy spawn rate curve (enemies per second).")]
