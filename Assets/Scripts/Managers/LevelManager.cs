@@ -1,0 +1,283 @@
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using ITWaves.Level;
+using ITWaves.Systems;
+using ITWaves.Snake;
+using ITWaves.Core;
+using System;
+
+namespace ITWaves
+{
+    /// <summary>
+    /// Orchestrates level flow from init → play → escape/defeat → transition.
+    /// </summary>
+    public class LevelManager : MonoBehaviour
+    {
+        public static LevelManager Instance { get; private set; }
+
+        [Header("Level Configuration")]
+        [SerializeField, Tooltip("Current level index (1-20).")]
+        private int currentLevel = 1;
+
+        [SerializeField, Tooltip("Level configuration.")]
+        private LevelConfig levelConfig;
+
+        [SerializeField, Tooltip("Difficulty profile for all levels.")]
+        private LevelDifficultyProfile difficultyProfile;
+
+        [Header("References")]
+        [SerializeField, Tooltip("Procedural layout generator.")]
+        private ProceduralLayoutGenerator layoutGenerator;
+
+        [SerializeField, Tooltip("Enemy spawner.")]
+        private Spawner enemySpawner;
+
+        [SerializeField, Tooltip("Snake spawner.")]
+        private SnakeSpawner snakeSpawner;
+
+        [SerializeField, Tooltip("Player prefab.")]
+        private GameObject playerPrefab;
+
+        [Header("State")]
+        [SerializeField, Tooltip("Is level currently active.")]
+        private bool isLevelActive;
+
+        private GameObject currentPlayer;
+        private SnakeController currentSnake;
+
+        public int CurrentLevel => currentLevel;
+        public bool IsLevelActive => isLevelActive;
+
+        // Events
+        public event Action<int> OnLevelStarted;
+        public event Action<int> OnLevelCompleted;
+        public event Action OnPlayerDied;
+
+        private void Awake()
+        {
+            if (Instance != null && Instance != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
+            Instance = this;
+        }
+
+        private void Start()
+        {
+            // Auto-start if in Game scene
+            if (SceneManager.GetActiveScene().name == "Game")
+            {
+                // Ensure GridManager is initialized before starting
+                if (Core.GridManager.Instance == null)
+                {
+                    Debug.LogError("GridManager not found in scene! Please add GridManager component to the scene.");
+                    return;
+                }
+
+                StartRun(currentLevel);
+            }
+        }
+
+        /// <summary>
+        /// Start a level run.
+        /// </summary>
+        public void StartRun(int levelIndex)
+        {
+            currentLevel = Mathf.Clamp(levelIndex, 1, 20);
+            isLevelActive = true;
+
+            Debug.Log($"Starting Level {currentLevel}");
+
+            // Generate layout
+            if (layoutGenerator != null && levelConfig != null && difficultyProfile != null)
+            {
+                layoutGenerator.Generate(levelConfig, difficultyProfile, currentLevel);
+            }
+
+            // Spawn player at centre
+            SpawnPlayer();
+
+            // Spawn snake
+            SpawnSnake();
+
+            // Start enemy spawning
+            if (enemySpawner != null && difficultyProfile != null)
+            {
+                enemySpawner.SetLevel(currentLevel);
+                enemySpawner.SetSpawnRate(difficultyProfile.GetEnemySpawnRate(currentLevel));
+                enemySpawner.SetMaxActive(difficultyProfile.GetEnemyCap(currentLevel));
+                enemySpawner.StartSpawning();
+            }
+
+            OnLevelStarted?.Invoke(currentLevel);
+        }
+
+        private void SpawnPlayer()
+        {
+            if (playerPrefab == null)
+            {
+                Debug.LogError("Player prefab not assigned!");
+                return;
+            }
+
+            // Spawn at centre
+            currentPlayer = Instantiate(playerPrefab, Vector3.zero, Quaternion.identity);
+
+            // Subscribe to player death
+            var playerHealth = currentPlayer.GetComponent<Player.PlayerHealth>();
+            if (playerHealth != null)
+            {
+                playerHealth.OnDied += HandlePlayerDied;
+            }
+        }
+
+        private void SpawnSnake()
+        {
+            if (snakeSpawner == null || difficultyProfile == null || levelConfig == null)
+            {
+                Debug.LogError("Snake spawner, difficulty profile, or level config not assigned!");
+                return;
+            }
+
+            // Spawn away from player
+            Vector2 spawnPos = layoutGenerator != null
+                ? layoutGenerator.GetRandomEdgeSpawnPosition(levelConfig)
+                : new Vector2(10f, 10f);
+
+            currentSnake = snakeSpawner.Spawn(spawnPos, currentLevel);
+
+            // Snake now uses segment-based damage system
+            // No need to subscribe to health events - snake handles its own lifecycle
+        }
+
+        /// <summary>
+        /// Handle snake escaping (levels 1-19).
+        /// </summary>
+        public void HandleSnakeEscaped()
+        {
+            Debug.Log($"Snake escaped from Level {currentLevel}!");
+
+            isLevelActive = false;
+
+            // Stop spawning
+            if (enemySpawner != null)
+            {
+                enemySpawner.StopSpawning();
+                enemySpawner.ClearAll();
+            }
+
+            // Clear boxes
+            if (layoutGenerator != null)
+            {
+                layoutGenerator.ClearLayout();
+            }
+
+            // Update save data
+            SaveManager.UpdateHighestLevel(currentLevel + 1);
+
+            OnLevelCompleted?.Invoke(currentLevel);
+
+            // Load next level
+            if (currentLevel < 20)
+            {
+                Invoke(nameof(LoadNextLevel), 2f);
+            }
+        }
+
+        /// <summary>
+        /// Handle snake defeated (level 20).
+        /// </summary>
+        public void HandleSnakeDefeated()
+        {
+            Debug.Log($"Snake defeated on Level {currentLevel}!");
+
+            isLevelActive = false;
+
+            // Stop spawning and clear enemies
+            if (enemySpawner != null)
+            {
+                enemySpawner.StopSpawning();
+                enemySpawner.ClearAll();
+            }
+
+            // Clear boxes
+            if (layoutGenerator != null)
+            {
+                layoutGenerator.ClearLayout();
+            }
+
+            if (currentLevel >= 20)
+            {
+                // Victory!
+                SaveManager.UpdateHighestLevel(20);
+                Invoke(nameof(LoadWinScene), 2f);
+            }
+            else
+            {
+                // Shouldn't happen, but treat as escape
+                HandleSnakeEscaped();
+            }
+        }
+
+        /// <summary>
+        /// Handle player death.
+        /// </summary>
+        public void HandlePlayerDied()
+        {
+            Debug.Log("Player died!");
+
+            isLevelActive = false;
+
+            // Stop spawning and clear enemies
+            if (enemySpawner != null)
+            {
+                enemySpawner.StopSpawning();
+                enemySpawner.ClearAll();
+            }
+
+            // Clear boxes
+            if (layoutGenerator != null)
+            {
+                layoutGenerator.ClearLayout();
+            }
+
+            // Save final score (optional - requires GameManager in scene)
+            // var gameManager = FindFirstObjectByType<ITWaves.Core.GameManager>();
+            // if (gameManager != null)
+            // {
+            //     gameManager.SaveFinalScore();
+            // }
+
+            OnPlayerDied?.Invoke();
+
+            // Load game over scene
+            Invoke(nameof(LoadGameOverScene), 2f);
+        }
+
+        private void LoadNextLevel()
+        {
+            // Reload Game scene with next level
+            currentLevel++;
+            SceneManager.LoadScene("Game");
+        }
+
+        private void LoadWinScene()
+        {
+            SceneManager.LoadScene("Win");
+        }
+
+        private void LoadGameOverScene()
+        {
+            SceneManager.LoadScene("GameOver");
+        }
+
+        private void OnDestroy()
+        {
+            if (Instance == this)
+            {
+                Instance = null;
+            }
+        }
+    }
+}
