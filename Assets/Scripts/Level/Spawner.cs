@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
+using ITWaves.Core;
+using ITWaves.Snake;
 
 namespace ITWaves.Level
 {
@@ -101,11 +103,11 @@ namespace ITWaves.Level
             // Choose random prefab
             GameObject prefab = spawnPrefabs[Random.Range(0, spawnPrefabs.Count)];
 
-            // Get spawn position
+            // Get spawn position (avoiding snake-occupied cells)
             Vector3 spawnPos;
-            if (spawnOnEdges && layoutGenerator != null && levelConfig != null)
+            if (spawnOnEdges && GridManager.Instance != null)
             {
-                spawnPos = layoutGenerator.GetRandomEdgeSpawnPosition(levelConfig);
+                spawnPos = GetSafeEdgeSpawnPosition();
             }
             else
             {
@@ -131,6 +133,57 @@ namespace ITWaves.Level
 
                 activeObjects.Add(obj);
             }
+        }
+
+        /// <summary>
+        /// Get a safe edge spawn position that avoids snake-occupied cells.
+        /// </summary>
+        private Vector2 GetSafeEdgeSpawnPosition()
+        {
+            if (GridManager.Instance == null)
+            {
+                return Vector2.zero;
+            }
+
+            // Find the snake controller to get occupied cells
+            SnakeController snake = FindFirstObjectByType<SnakeController>();
+            IReadOnlyList<Vector2> snakeOccupiedCells = snake != null ? snake.GetOccupiedCells() : null;
+
+            int maxAttempts = 30;
+            for (int attempt = 0; attempt < maxAttempts; attempt++)
+            {
+                Vector2Int edgeGridPos = GridManager.Instance.GetRandomEdgeGridPosition();
+                Vector2 worldPos = GridManager.Instance.GridToWorld(edgeGridPos);
+
+                // Check if this position is occupied by the snake
+                bool occupiedBySnake = false;
+                if (snakeOccupiedCells != null)
+                {
+                    foreach (Vector2 snakeCell in snakeOccupiedCells)
+                    {
+                        Vector2Int snakeCellGrid = GridManager.Instance.WorldToGrid(snakeCell);
+                        if (snakeCellGrid == edgeGridPos)
+                        {
+                            occupiedBySnake = true;
+                            break;
+                        }
+                    }
+                }
+
+                // If not occupied by snake, check for other obstacles
+                if (!occupiedBySnake)
+                {
+                    LayerMask obstacleMask = LayerMask.GetMask("Props", "Enemy");
+                    Collider2D hit = Physics2D.OverlapCircle(worldPos, 0.4f, obstacleMask);
+                    if (hit == null)
+                    {
+                        return worldPos;
+                    }
+                }
+            }
+
+            // Fallback: return any edge position
+            return GridManager.Instance.GetRandomEdgeWorldPosition();
         }
         
         /// <summary>

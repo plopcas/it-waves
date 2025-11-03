@@ -44,6 +44,15 @@ namespace ITWaves.Snake
         public bool IsVisible => isVisible;
 
         /// <summary>
+        /// Get all grid positions the snake has occupied in the current level.
+        /// Used by enemies to avoid spawning in or moving through snake-occupied cells.
+        /// </summary>
+        public IReadOnlyList<Vector2> GetOccupiedCells()
+        {
+            return pathHistory;
+        }
+
+        /// <summary>
         /// Get the position a segment should be at based on its index.
         /// Segment 0 follows the head, segment 1 follows segment 0, etc.
         /// </summary>

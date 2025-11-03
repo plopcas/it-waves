@@ -154,7 +154,7 @@ Rigidbody2D:
     m_Bits: 0
   m_Interpolate: 0
   m_SleepingMode: 1
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
   m_Constraints: 0
 --- !u!114 &5722521079141540670
 MonoBehaviour:
@@ -168,7 +168,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9c06346c665315e46ac8d9a9f01afcd1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ITWaves.Runtime::ITWaves.Snake.SnakeSegment
-  followDistance: 0.5
-  followSpeed: 10
-  leader: {fileID: 0}
-  snakeHealth: {fileID: 0}
+  snakeController: {fileID: 0}

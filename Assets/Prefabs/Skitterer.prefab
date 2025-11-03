@@ -155,7 +155,7 @@ Rigidbody2D:
     m_Bits: 0
   m_Interpolate: 0
   m_SleepingMode: 1
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
   m_Constraints: 0
 --- !u!114 &6760184649300066792
 MonoBehaviour:
@@ -172,10 +172,11 @@ MonoBehaviour:
   moveSpeed: 3
   detectionRange: 10
   contactDamage: 1
+  wanderStepsPerSecond: 2
   wanderChangeInterval: 0.5
+  chargeSteps: 5
+  chargeStepsPerSecond: 6
   chargeCooldown: 3
-  chargeDuration: 1
-  chargeSpeedMultiplier: 3
 --- !u!114 &8403978555840176137
 MonoBehaviour:
   m_ObjectHideFlags: 0

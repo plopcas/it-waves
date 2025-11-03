@@ -1,109 +1,79 @@
 using UnityEngine;
 using ITWaves.Level;
 using ITWaves.Core;
+using ITWaves.Snake;
+using System.Collections.Generic;
 
 namespace ITWaves.Enemies
 {
     /// <summary>
-    /// Skitterer enemy: zig-zag wander, periodic charges at player.
+    /// Skitterer enemy: constantly moves toward player (center of screen), avoiding snake-occupied cells.
+    /// Faster than Crawler.
     /// </summary>
     public class Skitterer : EnemyBase
     {
         [Header("Skitterer Settings")]
-        [SerializeField, Tooltip("Steps per second during wander.")]
-        private float wanderStepsPerSecond = 2f;
+        [SerializeField, Tooltip("Steps per second.")]
+        private float stepsPerSecond = 3f;
 
-        [SerializeField, Tooltip("Wander direction change interval.")]
-        private float wanderChangeInterval = 1f;
+        [SerializeField, Tooltip("Direction change interval.")]
+        private float directionChangeInterval = 0.5f;
 
-        [SerializeField, Tooltip("Steps during charge.")]
-        private int chargeSteps = 5;
-
-        [SerializeField, Tooltip("Steps per second during charge.")]
-        private float chargeStepsPerSecond = 6f;
-
-        [SerializeField, Tooltip("Charge cooldown.")]
-        private float chargeCooldown = 4f;
-
-        private enum SkittererState
-        {
-            Wander,
-            Charge
-        }
-
-        private SkittererState state = SkittererState.Wander;
-        private float stateTimer;
-        private float chargeTimer;
         private float stepTimer;
-        private int stepsRemaining;
+        private float directionTimer;
         private Vector2Int currentDirection;
         private Vector2 currentGridPos;
+        private SnakeController snake;
         
         protected override void Awake()
         {
             base.Awake();
             currentGridPos = GridManager.Instance.SnapToGrid(transform.position);
             rb.position = currentGridPos;
+
+            // Find snake reference
+            snake = FindFirstObjectByType<SnakeController>();
         }
 
         public override void Initialise(LevelDifficultyProfile difficulty, int levelIndex)
         {
             base.Initialise(difficulty, levelIndex);
-            state = SkittererState.Wander;
-            stateTimer = 0f;
-            chargeTimer = chargeCooldown;
-            PickNewWanderDirection();
+            directionTimer = 0f;
+            UpdateDirectionTowardPlayer();
         }
 
         protected override void UpdateBehaviour()
         {
-            stateTimer -= Time.deltaTime;
-            chargeTimer -= Time.deltaTime;
             stepTimer -= Time.deltaTime;
+            directionTimer -= Time.deltaTime;
 
-            switch (state)
+            // Update direction periodically
+            if (directionTimer <= 0f)
             {
-                case SkittererState.Wander:
-                    if (stepTimer <= 0f)
-                    {
-                        TakeStep();
-                        stepTimer = 1f / wanderStepsPerSecond;
-                    }
+                UpdateDirectionTowardPlayer();
+                directionTimer = directionChangeInterval;
+            }
 
-                    if (stateTimer <= 0f)
-                    {
-                        PickNewWanderDirection();
-                        stateTimer = wanderChangeInterval;
-                    }
-
-                    // Check if can charge
-                    if (chargeTimer <= 0f && IsPlayerInRange())
-                    {
-                        StartCharge();
-                    }
-                    break;
-
-                case SkittererState.Charge:
-                    if (stepTimer <= 0f && stepsRemaining > 0)
-                    {
-                        TakeStep();
-                        stepTimer = 1f / chargeStepsPerSecond;
-                        stepsRemaining--;
-
-                        if (stepsRemaining <= 0)
-                        {
-                            EndCharge();
-                        }
-                    }
-                    break;
+            // Take steps
+            if (stepTimer <= 0f)
+            {
+                TakeStep();
+                stepTimer = 1f / stepsPerSecond;
             }
         }
 
         private void TakeStep()
         {
-            // Move one grid cell in current direction
-            currentGridPos += (Vector2)currentDirection;
-            currentGridPos = GridManager.Instance.SnapToGrid(currentGridPos);
+            // Calculate next position
+            Vector2 nextGridPos = currentGridPos + (Vector2)currentDirection;
+            nextGridPos = GridManager.Instance.SnapToGrid(nextGridPos);
+
+            // Check if next position is occupied by snake
+            if (!IsCellOccupiedBySnake(nextGridPos))
+            {
+                currentGridPos = nextGridPos;
+            }
+            // If blocked by snake, stay in place (don't move into snake)
         }
 
         private void FixedUpdate()
@@ -111,48 +81,24 @@ namespace ITWaves.Enemies
             // Smoothly move visual position to grid position
             rb.MovePosition(Vector2.MoveTowards(rb.position, currentGridPos, moveSpeed * Time.fixedDeltaTime));
         }
-        
-        private void PickNewWanderDirection()
+
+        /// <summary>
+        /// Update direction to move toward center of screen (where player is).
+        /// </summary>
+        private void UpdateDirectionTowardPlayer()
         {
-            // Pick random grid direction (8-directional)
-            int[] options = { -1, 0, 1 };
-            int x = options[Random.Range(0, 3)];
-            int y = options[Random.Range(0, 3)];
+            // Always move toward center of screen (where player is)
+            Vector2 dirToCenter = (Vector2.zero - currentGridPos).normalized;
 
-            // Avoid staying still
-            if (x == 0 && y == 0)
-            {
-                x = Random.value > 0.5f ? 1 : -1;
-            }
-
-            currentDirection = new Vector2Int(x, y);
-
-            // Rotate to face direction
-            if (currentDirection != Vector2Int.zero)
-            {
-                float angle = Mathf.Atan2(currentDirection.y, currentDirection.x) * Mathf.Rad2Deg;
-                transform.rotation = Quaternion.Euler(0f, 0f, angle - 90f);
-            }
-        }
-        
-        private void StartCharge()
-        {
-            state = SkittererState.Charge;
-            stepsRemaining = chargeSteps;
-            stepTimer = 0f;
-            chargeTimer = chargeCooldown;
-
-            // Pick direction toward player (grid-aligned)
-            Vector2 dirToPlayer = GetDirectionToPlayer();
-
+            // Convert to grid direction (8-directional)
             int x = 0;
             int y = 0;
 
-            if (dirToPlayer.x > 0.3f) x = 1;
-            else if (dirToPlayer.x < -0.3f) x = -1;
+            if (dirToCenter.x > 0.3f) x = 1;
+            else if (dirToCenter.x < -0.3f) x = -1;
 
-            if (dirToPlayer.y > 0.3f) y = 1;
-            else if (dirToPlayer.y < -0.3f) y = -1;
+            if (dirToCenter.y > 0.3f) y = 1;
+            else if (dirToCenter.y < -0.3f) y = -1;
 
             currentDirection = new Vector2Int(x, y);
 
@@ -163,12 +109,35 @@ namespace ITWaves.Enemies
                 transform.rotation = Quaternion.Euler(0f, 0f, angle - 90f);
             }
         }
-        
-        private void EndCharge()
+
+        /// <summary>
+        /// Check if a grid cell is occupied by the snake.
+        /// </summary>
+        private bool IsCellOccupiedBySnake(Vector2 worldPos)
         {
-            state = SkittererState.Wander;
-            PickNewWanderDirection();
-            stateTimer = wanderChangeInterval;
+            if (snake == null || GridManager.Instance == null)
+            {
+                return false;
+            }
+
+            IReadOnlyList<Vector2> snakeOccupiedCells = snake.GetOccupiedCells();
+            if (snakeOccupiedCells == null || snakeOccupiedCells.Count == 0)
+            {
+                return false;
+            }
+
+            Vector2Int checkGridPos = GridManager.Instance.WorldToGrid(worldPos);
+
+            foreach (Vector2 snakeCell in snakeOccupiedCells)
+            {
+                Vector2Int snakeCellGrid = GridManager.Instance.WorldToGrid(snakeCell);
+                if (snakeCellGrid == checkGridPos)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }
