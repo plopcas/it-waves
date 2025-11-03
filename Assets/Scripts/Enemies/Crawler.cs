@@ -7,7 +7,9 @@ using System.Collections.Generic;
 namespace ITWaves.Enemies
 {
     /// <summary>
-    /// Crawler enemy: moves in bursts toward player (center of screen) on grid, avoiding snake-occupied cells.
+    /// Crawler enemy: moves in bursts toward player (center of screen) on grid.
+    /// Randomly chooses diagonal or lateral movement, and varies speed between slow and fast.
+    /// Avoids boxes and snake path.
     /// </summary>
     public class Crawler : EnemyBase
     {
@@ -16,10 +18,13 @@ namespace ITWaves.Enemies
         private int stepsPerBurst = 3;
 
         [SerializeField, Tooltip("Pause duration between bursts.")]
-        private float pauseDuration = 2f;
+        private float pauseDuration = 1.5f;
 
-        [SerializeField, Tooltip("Steps per second during burst.")]
-        private float burstStepsPerSecond = 4f;
+        [SerializeField, Tooltip("Steps per second during slow burst.")]
+        private float slowStepsPerSecond = 2f;
+
+        [SerializeField, Tooltip("Steps per second during fast burst.")]
+        private float fastStepsPerSecond = 6f;
 
         private enum CrawlerState
         {
@@ -27,8 +32,16 @@ namespace ITWaves.Enemies
             Pause
         }
 
+        private enum MovementType
+        {
+            Diagonal,
+            Lateral
+        }
+
         private CrawlerState state = CrawlerState.Pause;
         private float stateTimer;
+        private bool isFastBurst; // Track if current burst is fast or slow
+        private MovementType currentMovementType;
         
         public override void Initialise(LevelDifficultyProfile difficulty, int levelIndex)
         {
@@ -64,7 +77,8 @@ namespace ITWaves.Enemies
                     if (stepTimer <= 0f && stepsRemaining > 0)
                     {
                         TakeStep();
-                        stepTimer = 1f / burstStepsPerSecond;
+                        float currentSpeed = isFastBurst ? fastStepsPerSecond : slowStepsPerSecond;
+                        stepTimer = 1f / currentSpeed;
                         stepsRemaining--;
 
                         if (stepsRemaining <= 0)
@@ -89,18 +103,19 @@ namespace ITWaves.Enemies
             Vector2 nextGridPos = currentGridPos + (Vector2)currentDirection;
             nextGridPos = GridManager.Instance.SnapToGrid(nextGridPos);
 
-            // Check if next position is occupied by snake
-            if (!IsCellOccupiedBySnake(nextGridPos))
+            // Check if next position is valid and not blocked
+            if (IsValidMove(nextGridPos))
             {
                 currentGridPos = nextGridPos;
             }
-            // If blocked by snake, stay in place (don't move into snake)
+            // If blocked, stay in place (don't move into obstacles)
         }
 
         private void FixedUpdate()
         {
-            // Smoothly move visual position to grid position
-            rb.MovePosition(Vector2.MoveTowards(rb.position, currentGridPos, moveSpeed * Time.fixedDeltaTime));
+            // Snap directly to current grid position (no smooth interpolation - discrete grid movement like snake)
+            rb.MovePosition(currentGridPos);
+            transform.position = currentGridPos;
         }
 
         private void StartBurst()
@@ -109,33 +124,84 @@ namespace ITWaves.Enemies
             stepsRemaining = stepsPerBurst;
             stepTimer = 0f;
 
+            // Randomly choose speed (50% chance of fast or slow)
+            isFastBurst = Random.value > 0.5f;
+
+            // Randomly choose movement type (50% chance of diagonal or lateral)
+            currentMovementType = Random.value > 0.5f ? MovementType.Diagonal : MovementType.Lateral;
+
             // Always move toward center of screen (where player is)
             Vector2 dirToCenter = (Vector2.zero - currentGridPos).normalized;
 
-            // Convert to grid direction (8-directional)
+            // Convert to grid direction based on movement type
             int x = 0;
             int y = 0;
 
-            if (dirToCenter.x > 0.3f) x = 1;
-            else if (dirToCenter.x < -0.3f) x = -1;
+            if (currentMovementType == MovementType.Diagonal)
+            {
+                // Diagonal movement: both x and y can be non-zero
+                if (dirToCenter.x > 0.3f) x = 1;
+                else if (dirToCenter.x < -0.3f) x = -1;
 
-            if (dirToCenter.y > 0.3f) y = 1;
-            else if (dirToCenter.y < -0.3f) y = -1;
+                if (dirToCenter.y > 0.3f) y = 1;
+                else if (dirToCenter.y < -0.3f) y = -1;
+            }
+            else
+            {
+                // Lateral movement: only x OR y, choose the dominant direction
+                if (Mathf.Abs(dirToCenter.x) > Mathf.Abs(dirToCenter.y))
+                {
+                    // Move horizontally
+                    if (dirToCenter.x > 0.3f) x = 1;
+                    else if (dirToCenter.x < -0.3f) x = -1;
+                }
+                else
+                {
+                    // Move vertically
+                    if (dirToCenter.y > 0.3f) y = 1;
+                    else if (dirToCenter.y < -0.3f) y = -1;
+                }
+            }
 
             currentDirection = new Vector2Int(x, y);
-
-            // Rotate to face direction
-            if (currentDirection != Vector2Int.zero)
-            {
-                float angle = Mathf.Atan2(currentDirection.y, currentDirection.x) * Mathf.Rad2Deg;
-                transform.rotation = Quaternion.Euler(0f, 0f, angle - 90f);
-            }
         }
 
         private void StartPause()
         {
             state = CrawlerState.Pause;
             stateTimer = pauseDuration;
+        }
+
+        /// <summary>
+        /// Check if a move to the given position is valid (not blocked by snake, boxes, or out of bounds).
+        /// </summary>
+        private bool IsValidMove(Vector2 worldPos)
+        {
+            if (GridManager.Instance == null)
+            {
+                return false;
+            }
+
+            // Check if position is within grid bounds
+            Vector2Int gridPos = GridManager.Instance.WorldToGrid(worldPos);
+            if (!GridManager.Instance.IsValidGridPosition(gridPos))
+            {
+                return false;
+            }
+
+            // Check if occupied by snake
+            if (IsCellOccupiedBySnake(worldPos))
+            {
+                return false;
+            }
+
+            // Check if occupied by boxes or other obstacles
+            if (IsCellOccupiedByObstacle(worldPos))
+            {
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -160,6 +226,32 @@ namespace ITWaves.Enemies
             {
                 Vector2Int snakeCellGrid = GridManager.Instance.WorldToGrid(snakeCell);
                 if (snakeCellGrid == checkGridPos)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Check if a grid cell is occupied by boxes or other obstacles.
+        /// </summary>
+        private bool IsCellOccupiedByObstacle(Vector2 worldPos)
+        {
+            if (GridManager.Instance == null)
+            {
+                return false;
+            }
+
+            // Check for boxes and props at this position
+            float checkRadius = GridManager.Instance.CellSize * 0.4f;
+            Collider2D[] hits = Physics2D.OverlapCircleAll(worldPos, checkRadius);
+
+            foreach (Collider2D hit in hits)
+            {
+                // Check for boxes or props layer
+                if (hit.CompareTag("Box") || hit.gameObject.layer == LayerMask.NameToLayer("Props"))
                 {
                     return true;
                 }

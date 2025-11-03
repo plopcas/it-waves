@@ -6,14 +6,11 @@ namespace ITWaves.Enemies
     /// <summary>
     /// Base class for enemy behaviour.
     /// Enemies always move toward the player (center of screen) and kill on contact.
+    /// Movement is discrete, snapping from grid cell to grid cell like the snake.
     /// </summary>
     [RequireComponent(typeof(Rigidbody2D))]
     public abstract class EnemyBase : MonoBehaviour
     {
-        [Header("Base Settings")]
-        [SerializeField, Tooltip("Movement speed for smooth visual interpolation.")]
-        protected float moveSpeed = 3f;
-
         protected Rigidbody2D rb;
         protected EnemyHealth health;
         protected bool isInitialised;

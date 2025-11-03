@@ -7,21 +7,24 @@ using System.Collections.Generic;
 namespace ITWaves.Enemies
 {
     /// <summary>
-    /// Skitterer enemy: constantly moves toward player (center of screen), avoiding snake-occupied cells.
-    /// Faster than Crawler.
+    /// Skitterer enemy: moves at constant medium speed with zig-zag pattern toward player (center of screen).
+    /// Avoids snake-occupied cells and boxes.
     /// </summary>
     public class Skitterer : EnemyBase
     {
         [Header("Skitterer Settings")]
-        [SerializeField, Tooltip("Steps per second.")]
-        private float stepsPerSecond = 3f;
+        [SerializeField, Tooltip("Steps per second (medium speed, between Crawler's slow and fast).")]
+        private float stepsPerSecond = 3.5f;
 
-        [SerializeField, Tooltip("Direction change interval.")]
-        private float directionChangeInterval = 0.5f;
+        [SerializeField, Tooltip("Steps before changing direction (zig-zag pattern).")]
+        private int stepsBeforeZag = 2;
 
         private float stepTimer;
-        private float directionTimer;
+        private int stepsSinceLastZag;
         private Vector2Int currentDirection;
+        private Vector2Int primaryDirection; // Main direction toward player
+        private Vector2Int alternateDirection; // Perpendicular direction for zig-zag
+        private bool movingPrimary; // True if moving in primary direction, false if zagging
         private Vector2 currentGridPos;
         private SnakeController snake;
         
@@ -38,76 +41,138 @@ namespace ITWaves.Enemies
         public override void Initialise(LevelDifficultyProfile difficulty, int levelIndex)
         {
             base.Initialise(difficulty, levelIndex);
-            directionTimer = 0f;
-            UpdateDirectionTowardPlayer();
+            stepsSinceLastZag = 0;
+            movingPrimary = true;
+            CalculateZigZagDirections();
         }
 
         protected override void UpdateBehaviour()
         {
             stepTimer -= Time.deltaTime;
-            directionTimer -= Time.deltaTime;
 
-            // Update direction periodically
-            if (directionTimer <= 0f)
-            {
-                UpdateDirectionTowardPlayer();
-                directionTimer = directionChangeInterval;
-            }
-
-            // Take steps
+            // Take steps at constant rate
             if (stepTimer <= 0f)
             {
                 TakeStep();
                 stepTimer = 1f / stepsPerSecond;
+
+                // Check if it's time to zag
+                stepsSinceLastZag++;
+                if (stepsSinceLastZag >= stepsBeforeZag)
+                {
+                    ToggleZigZag();
+                    stepsSinceLastZag = 0;
+                }
             }
         }
 
         private void TakeStep()
         {
-            // Calculate next position
+            // Calculate next position based on current direction
             Vector2 nextGridPos = currentGridPos + (Vector2)currentDirection;
             nextGridPos = GridManager.Instance.SnapToGrid(nextGridPos);
 
-            // Check if next position is occupied by snake
-            if (!IsCellOccupiedBySnake(nextGridPos))
+            // Check if next position is valid
+            if (IsValidMove(nextGridPos))
             {
                 currentGridPos = nextGridPos;
             }
-            // If blocked by snake, stay in place (don't move into snake)
+            else
+            {
+                // If blocked, recalculate directions and try to continue
+                CalculateZigZagDirections();
+            }
         }
 
         private void FixedUpdate()
         {
-            // Smoothly move visual position to grid position
-            rb.MovePosition(Vector2.MoveTowards(rb.position, currentGridPos, moveSpeed * Time.fixedDeltaTime));
+            // Snap directly to current grid position (no smooth interpolation - discrete grid movement like snake)
+            rb.MovePosition(currentGridPos);
+            transform.position = currentGridPos;
         }
 
         /// <summary>
-        /// Update direction to move toward center of screen (where player is).
+        /// Calculate primary and alternate directions for zig-zag pattern toward player.
         /// </summary>
-        private void UpdateDirectionTowardPlayer()
+        private void CalculateZigZagDirections()
         {
             // Always move toward center of screen (where player is)
             Vector2 dirToCenter = (Vector2.zero - currentGridPos).normalized;
 
-            // Convert to grid direction (8-directional)
+            // Determine primary direction (dominant axis toward player)
             int x = 0;
             int y = 0;
 
-            if (dirToCenter.x > 0.3f) x = 1;
-            else if (dirToCenter.x < -0.3f) x = -1;
-
-            if (dirToCenter.y > 0.3f) y = 1;
-            else if (dirToCenter.y < -0.3f) y = -1;
-
-            currentDirection = new Vector2Int(x, y);
-
-            // Rotate to face direction
-            if (currentDirection != Vector2Int.zero)
+            if (Mathf.Abs(dirToCenter.x) > Mathf.Abs(dirToCenter.y))
             {
-                float angle = Mathf.Atan2(currentDirection.y, currentDirection.x) * Mathf.Rad2Deg;
-                transform.rotation = Quaternion.Euler(0f, 0f, angle - 90f);
+                // Horizontal is dominant
+                if (dirToCenter.x > 0.3f) x = 1;
+                else if (dirToCenter.x < -0.3f) x = -1;
+
+                primaryDirection = new Vector2Int(x, 0);
+
+                // Alternate direction is vertical
+                if (dirToCenter.y > 0.3f) y = 1;
+                else if (dirToCenter.y < -0.3f) y = -1;
+                alternateDirection = new Vector2Int(0, y);
             }
+            else
+            {
+                // Vertical is dominant
+                if (dirToCenter.y > 0.3f) y = 1;
+                else if (dirToCenter.y < -0.3f) y = -1;
+
+                primaryDirection = new Vector2Int(0, y);
+
+                // Alternate direction is horizontal
+                if (dirToCenter.x > 0.3f) x = 1;
+                else if (dirToCenter.x < -0.3f) x = -1;
+                alternateDirection = new Vector2Int(x, 0);
+            }
+
+            // Set current direction based on zig-zag state
+            currentDirection = movingPrimary ? primaryDirection : alternateDirection;
+        }
+
+        /// <summary>
+        /// Toggle between primary and alternate direction for zig-zag movement.
+        /// </summary>
+        private void ToggleZigZag()
+        {
+            movingPrimary = !movingPrimary;
+            currentDirection = movingPrimary ? primaryDirection : alternateDirection;
+        }
+
+        /// <summary>
+        /// Check if a move to the given position is valid (not blocked by snake, boxes, or out of bounds).
+        /// </summary>
+        private bool IsValidMove(Vector2 worldPos)
+        {
+            if (GridManager.Instance == null)
+            {
+                return false;
+            }
+
+            // Check if position is within grid bounds
+            Vector2Int gridPos = GridManager.Instance.WorldToGrid(worldPos);
+            if (!GridManager.Instance.IsValidGridPosition(gridPos))
+            {
+                return false;
+            }
+
+            // Check if occupied by snake
+            if (IsCellOccupiedBySnake(worldPos))
+            {
+                return false;
+            }
+
+            // Check if occupied by boxes or other obstacles
+            if (IsCellOccupiedByObstacle(worldPos))
+            {
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -132,6 +197,32 @@ namespace ITWaves.Enemies
             {
                 Vector2Int snakeCellGrid = GridManager.Instance.WorldToGrid(snakeCell);
                 if (snakeCellGrid == checkGridPos)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Check if a grid cell is occupied by boxes or other obstacles.
+        /// </summary>
+        private bool IsCellOccupiedByObstacle(Vector2 worldPos)
+        {
+            if (GridManager.Instance == null)
+            {
+                return false;
+            }
+
+            // Check for boxes and props at this position
+            float checkRadius = GridManager.Instance.CellSize * 0.4f;
+            Collider2D[] hits = Physics2D.OverlapCircleAll(worldPos, checkRadius);
+
+            foreach (Collider2D hit in hits)
+            {
+                // Check for boxes or props layer
+                if (hit.CompareTag("Box") || hit.gameObject.layer == LayerMask.NameToLayer("Props"))
                 {
                     return true;
                 }
