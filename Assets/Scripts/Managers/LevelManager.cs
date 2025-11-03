@@ -51,7 +51,6 @@ namespace ITWaves
 
         // Events
         public event Action<int> OnLevelStarted;
-        public event Action<int> OnLevelCompleted;
         public event Action OnPlayerDied;
         public event Action<int, int> OnWaveStarted; // (level, wave)
 
@@ -271,13 +270,6 @@ namespace ITWaves
 
             // Notify listeners that a new wave has started
             OnWaveStarted?.Invoke(currentLevel, currentWave);
-        }
-
-        private void LoadNextLevel()
-        {
-            // Reload Game scene with next level
-            currentLevel++;
-            SceneManager.LoadScene("Game");
         }
 
         private void LoadWinScene()
