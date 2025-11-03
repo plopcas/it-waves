@@ -30,20 +30,6 @@ namespace ITWaves.Snake
         
         [SerializeField, Tooltip("Turn rate (degrees per second).")]
         public float turnRate = 90f;
-        
-        [Header("Behaviour")]
-        [SerializeField, Tooltip("Detection range for player.")]
-        public float detectionRange = 15f;
-
-        [SerializeField, Tooltip("Chase speed multiplier.")]
-        public float chaseSpeedMultiplier = 1.5f;
-
-        [SerializeField, Tooltip("Enrage speed multiplier.")]
-        public float enrageSpeedMultiplier = 2f;
-
-        [SerializeField, Tooltip("Enrage health threshold (percentage).")]
-        [Range(0f, 1f)]
-        public float enrageThreshold = 0.3f;
 
         [Header("Grid Movement")]
         [SerializeField, Tooltip("Minimum steps before randomly changing direction (zig-zag).")]

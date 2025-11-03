@@ -40,15 +40,7 @@ namespace ITWaves.Level
         
         [SerializeField, Tooltip("Box health (hits to destroy).")]
         public int boxHealth = 3;
-        
-        /// <summary>
-        /// Get snake HP for a given level.
-        /// </summary>
-        public float GetSnakeHP(int level)
-        {
-            return snakeBaseHP * (1f + snakeHPMultiplier * (level - 1));
-        }
-        
+
         /// <summary>
         /// Get snake segment count for a given level.
         /// </summary>
@@ -56,29 +48,13 @@ namespace ITWaves.Level
         {
             return snakeBaseSegments + (level - 1) / snakeSegmentsPerLevels;
         }
-        
+
         /// <summary>
         /// Get snake speed for a given level.
         /// </summary>
         public float GetSnakeSpeed(int level)
         {
             return snakeSpeedCurve.Evaluate(level);
-        }
-        
-        /// <summary>
-        /// Get snake wave amplitude for a given level.
-        /// </summary>
-        public float GetSnakeAmplitude(int level)
-        {
-            return snakeAmplitudeCurve.Evaluate(level);
-        }
-        
-        /// <summary>
-        /// Get snake wave frequency for a given level.
-        /// </summary>
-        public float GetSnakeFrequency(int level)
-        {
-            return snakeFrequencyCurve.Evaluate(level);
         }
         
         /// <summary>
