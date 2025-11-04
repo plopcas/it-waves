@@ -41,7 +41,6 @@ namespace ITWaves.Player
             if (value.isPressed)
             {
                 isFiring = true;
-                Debug.Log("Attack button pressed - starting fire");
 
                 // Fire immediately on button press if ready
                 if (Time.time >= nextFireTime)
@@ -64,7 +63,6 @@ namespace ITWaves.Player
             {
                 isFiring = false;
                 hasFiredThisPress = false;
-                Debug.Log("Attack button released - stopping fire");
             }
 
             // Continue firing while button is held (only if automatic fire is enabled)
@@ -97,18 +95,13 @@ namespace ITWaves.Player
             Vector2 aimDir = controller != null ? controller.AimDirection : Vector2.right;
             Vector3 spawnPos = transform.position + (Vector3)aimDir * bulletSpawnOffset;
 
-            Debug.Log($"[PlayerShooter] Firing bullet at {spawnPos}, direction: {aimDir}");
-
             GameObject bullet = Instantiate(bulletPrefab, spawnPos, Quaternion.identity);
 
             if (bullet != null)
             {
-                Debug.Log($"[PlayerShooter] Bullet instantiated: {bullet.name}, active: {bullet.activeSelf}");
-
                 var bulletComponent = bullet.GetComponent<Bullet>();
                 if (bulletComponent != null)
                 {
-                    Debug.Log($"[PlayerShooter] Launching bullet component");
                     bulletComponent.Launch(aimDir);
                 }
                 else

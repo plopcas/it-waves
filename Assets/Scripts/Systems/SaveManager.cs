@@ -23,7 +23,6 @@ namespace ITWaves.Systems
         {
             if (!HasSave())
             {
-                Debug.Log("No save file found. Creating new save data.");
                 cachedSaveData = new SaveData();
                 return cachedSaveData;
             }
@@ -42,7 +41,6 @@ namespace ITWaves.Systems
                 }
                 
                 cachedSaveData = JsonUtility.FromJson<SaveData>(json);
-                Debug.Log($"Save data loaded. Highest level: {cachedSaveData.highestLevelReached}");
                 return cachedSaveData;
             }
             catch (Exception e)
@@ -64,7 +62,6 @@ namespace ITWaves.Systems
                 File.WriteAllText(HashFilePath, hash);
                 
                 cachedSaveData = data;
-                Debug.Log($"Save data written. Highest level: {data.highestLevelReached}");
             }
             catch (Exception e)
             {
@@ -108,7 +105,6 @@ namespace ITWaves.Systems
                     File.Delete(HashFilePath);
                 }
                 cachedSaveData = new SaveData();
-                Debug.Log("Save data deleted.");
             }
             catch (Exception e)
             {

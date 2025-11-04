@@ -99,8 +99,6 @@ namespace ITWaves.Snake
             {
                 stepsUntilNextZag = Random.Range(config.minStepsBeforeRandomZag, config.maxStepsBeforeRandomZag + 1);
             }
-
-            Debug.Log($"Snake head spawned at {currentGridPos}, direction: {horizontalDirection}, segments: {segments.Count}");
         }
         
         public void Initialise(SnakeConfig cfg, LevelDifficultyProfile difficulty, int levelIndex)
@@ -307,8 +305,6 @@ namespace ITWaves.Snake
 
         private void TriggerGameOver()
         {
-            Debug.Log("Snake reached the player! Game Over!");
-
             // Stop all movement
             isVisible = false;
             enabled = false;
@@ -341,7 +337,6 @@ namespace ITWaves.Snake
             else
             {
                 // Reached the start of the path - snake escapes!
-                Debug.Log("Snake escaped!");
                 OnSnakeEscaped();
             }
         }
@@ -400,8 +395,6 @@ namespace ITWaves.Snake
                     verticalDirection = preferredVertical;
                     break;
             }
-
-            Debug.Log($"Snake starting from edge {edge}: horizontal={horizontalDirection}, vertical={verticalDirection}");
         }
 
         public void ApplyDamage(float amount, GameObject source = null)
@@ -424,22 +417,17 @@ namespace ITWaves.Snake
                 {
                     Destroy(tailSegment.gameObject);
                 }
-
-                Debug.Log($"Snake hit! Segments remaining: {segments.Count}");
             }
 
             // Check if all segments are destroyed - start retreat
             if (segments.Count == 0 && !isRetreating)
             {
-                Debug.Log("All segments destroyed! Snake head retreating...");
                 isRetreating = true;
             }
         }
 
         private void OnSnakeEscaped()
         {
-            Debug.Log("Snake escaped! Wave complete!");
-
             // Notify level manager that wave is complete
             if (Core.GameManager.Instance != null)
             {

@@ -106,11 +106,6 @@ namespace ITWaves.Level
                 if (enemy != null && difficultyProfile != null)
                 {
                     enemy.Initialise(difficultyProfile, currentLevel);
-                    Debug.Log($"[Spawner] Spawned and initialized {obj.name} at {spawnPos}. Active count: {activeObjects.Count + 1}");
-                }
-                else
-                {
-                    Debug.Log($"[Spawner] Spawned {obj.name} at {spawnPos} (no EnemyBase component). Active count: {activeObjects.Count + 1}");
                 }
 
                 activeObjects.Add(obj);

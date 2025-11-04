@@ -66,8 +66,6 @@ namespace ITWaves.Player
             int damage = Mathf.RoundToInt(amount);
             currentHealth = Mathf.Max(0, currentHealth - damage);
             
-            Debug.Log($"Player took {damage} damage. Health: {currentHealth}/{maxHealth}");
-            
             OnHealthChanged?.Invoke(currentHealth, maxHealth);
             
             if (currentHealth <= 0)
@@ -114,7 +112,6 @@ namespace ITWaves.Player
         
         private void HandleDeath()
         {
-            Debug.Log("Player died!");
             OnDied?.Invoke();
             
             // Disable controls

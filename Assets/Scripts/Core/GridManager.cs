@@ -73,11 +73,6 @@ namespace ITWaves.Core
             // Calculate grid origin (bottom-left corner)
             gridOrigin = new Vector2(-actualGridWidth / 2f, -actualGridHeight / 2f);
             gridCenter = Vector2.zero;
-
-            Debug.Log($"<color=cyan>GridManager: Initialized {gridWidth}x{gridHeight} grid (cell size: {cellSize})</color>");
-            Debug.Log($"<color=cyan>GridManager: Camera view: {cameraWidth}x{cameraHeight}, Grid size: {actualGridWidth}x{actualGridHeight}</color>");
-            Debug.Log($"<color=cyan>GridManager: Grid origin: {gridOrigin}, center: {gridCenter}</color>");
-            Debug.Log($"<color=cyan>GridManager: Margin: {margin}, Available space: {availableWidth}x{availableHeight}</color>");
         }
 
         public Vector2 GridToWorld(int gridX, int gridY)

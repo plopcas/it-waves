@@ -86,8 +86,6 @@ namespace ITWaves
             currentWave = 1; // Reset wave counter when starting a new level
             isLevelActive = true;
 
-            Debug.Log($"Starting Level {currentLevel}, Wave {currentWave}");
-
             // Generate layout
             if (layoutGenerator != null && levelConfig != null && difficultyProfile != null)
             {
@@ -156,8 +154,6 @@ namespace ITWaves
 
         public void HandleSnakeEscaped()
         {
-            Debug.Log($"Wave {currentWave} complete! Snake escaped from Level {currentLevel}!");
-
             isLevelActive = false;
 
             // Clear enemies
@@ -182,8 +178,6 @@ namespace ITWaves
 
         public void HandleSnakeDefeated()
         {
-            Debug.Log($"Snake defeated on Level {currentLevel}!");
-
             isLevelActive = false;
 
             // Stop spawning and clear enemies
@@ -214,8 +208,6 @@ namespace ITWaves
 
         public void HandlePlayerDied()
         {
-            Debug.Log("Player died!");
-
             isLevelActive = false;
 
             // Stop spawning and clear enemies
@@ -246,8 +238,6 @@ namespace ITWaves
 
         private void RestartWave()
         {
-            Debug.Log($"Starting Wave {currentWave} of Level {currentLevel}");
-
             isLevelActive = true;
 
             // Regenerate layout

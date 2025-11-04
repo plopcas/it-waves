@@ -22,12 +22,10 @@ namespace ITWaves.Systems
         
         private void Awake()
         {
-            Debug.Log($"[Bullet] Awake called on {gameObject.name} at {transform.position}");
             rb = GetComponent<Rigidbody2D>();
             if (rb != null)
             {
                 rb.gravityScale = 0f;
-                Debug.Log($"[Bullet] Rigidbody2D initialized successfully");
             }
             else
             {
@@ -67,8 +65,6 @@ namespace ITWaves.Systems
         
         public void Launch(Vector2 direction)
         {
-            Debug.Log($"[Bullet] Launch called on {gameObject.name}, direction: {direction}, rb null: {rb == null}");
-
             // Ensure rb is initialized (in case Launch is called before Awake)
             if (rb == null)
             {
@@ -77,7 +73,6 @@ namespace ITWaves.Systems
                 if (rb != null)
                 {
                     rb.gravityScale = 0f;
-                    Debug.Log($"[Bullet] Successfully got Rigidbody2D in Launch");
                 }
             }
 
@@ -88,13 +83,10 @@ namespace ITWaves.Systems
             }
 
             rb.linearVelocity = direction.normalized * speed;
-            Debug.Log($"[Bullet] Set velocity to {rb.linearVelocity}, speed: {speed}");
 
             // Rotate to face direction
             float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
             transform.rotation = Quaternion.Euler(0f, 0f, angle);
-
-            Debug.Log($"[Bullet] Bullet launched successfully at {transform.position}");
         }
         
         private void OnTriggerEnter2D(Collider2D other)

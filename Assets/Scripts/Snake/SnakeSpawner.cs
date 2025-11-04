@@ -75,9 +75,6 @@ namespace ITWaves.Snake
             // Initialize controller
             controller.Initialise(snakeConfig, difficultyProfile, levelIndex);
 
-            // Use provided segment count
-            Debug.Log($"Spawning snake with {segmentCount} segments for level {levelIndex}");
-
             // Determine which edge the head is on and spawn segments outward
             Vector2 outwardDirection = DetermineOutwardDirection(snappedPosition);
             SpawnSegments(controller, snappedPosition, segmentCount, outwardDirection);
