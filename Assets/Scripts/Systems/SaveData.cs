@@ -11,6 +11,7 @@ namespace ITWaves.Systems
         public float musicVolume = 1f;
         public float mouseSensitivity = 1f;
         public int qualityLevel = 2;
+        public bool treasureCollected = false; // Track if treasure box was collected in current run
 
         public SaveData()
         {
@@ -21,6 +22,7 @@ namespace ITWaves.Systems
             musicVolume = 1f;
             mouseSensitivity = 1f;
             qualityLevel = 2;
+            treasureCollected = false;
         }
     }
 }

@@ -109,6 +109,28 @@ namespace ITWaves.Systems
 
             Debug.Log("Resetting progress to wave 1");
             cachedSaveData.highestWaveReached = 1;
+            cachedSaveData.treasureCollected = false; // Reset treasure status on new game
+            Save(cachedSaveData);
+        }
+
+        public static bool IsTreasureCollected()
+        {
+            if (cachedSaveData == null)
+            {
+                cachedSaveData = Load();
+            }
+            return cachedSaveData.treasureCollected;
+        }
+
+        public static void SetTreasureCollected(bool collected)
+        {
+            if (cachedSaveData == null)
+            {
+                cachedSaveData = Load();
+            }
+
+            Debug.Log($"Setting treasure collected: {collected}");
+            cachedSaveData.treasureCollected = collected;
             Save(cachedSaveData);
         }
 

@@ -10,15 +10,21 @@ namespace ITWaves.Level
         [SerializeField, Tooltip("Box prefab to spawn.")]
         private GameObject boxPrefab;
 
+        [SerializeField, Tooltip("Treasure box prefab to spawn (optional).")]
+        private GameObject treasureBoxPrefab;
+
         [Header("Generation Settings")]
         [SerializeField, Tooltip("Minimum distance between boxes (in grid cells).")]
         private int minBoxDistanceInCells = 2;
+
+        [SerializeField, Tooltip("Wave number when treasure boxes start appearing.")]
+        private int treasureBoxStartWave = 5;
 
         private List<GameObject> spawnedBoxes = new List<GameObject>();
         private System.Random rng;
         private int generationCounter = 0; // Track how many times we've generated to vary seed
 
-        public void Generate(LevelConfig config, LevelDifficultyProfile difficulty, int difficultyLevel)
+        public void Generate(LevelConfig config, LevelDifficultyProfile difficulty, int difficultyLevel, int currentWave)
         {
             // Clear previous layout
             ClearLayout();
@@ -45,11 +51,16 @@ namespace ITWaves.Level
             float density = difficulty.GetBoxDensity(difficultyLevel);
             int boxCount = Mathf.RoundToInt((gridArea / 100f) * density);
 
+            // Check if we should spawn a treasure box (only if not already collected)
+            bool spawnTreasure = currentWave >= treasureBoxStartWave &&
+                                 treasureBoxPrefab != null &&
+                                 !Systems.SaveManager.IsTreasureCollected();
+
             // Generate boxes
-            GenerateBoxes(config, boxCount);
+            GenerateBoxes(config, boxCount, spawnTreasure);
         }
         
-        private void GenerateBoxes(LevelConfig config, int count)
+        private void GenerateBoxes(LevelConfig config, int count, bool spawnTreasure)
         {
             if (boxPrefab == null)
             {
@@ -106,11 +117,22 @@ namespace ITWaves.Level
             }
 
             // Spawn boxes at grid positions
-            foreach (var gridPos in gridPositions)
+            int treasureIndex = spawnTreasure && gridPositions.Count > 0 ? rng.Next(0, gridPositions.Count) : -1;
+
+            for (int i = 0; i < gridPositions.Count; i++)
             {
+                Vector2Int gridPos = gridPositions[i];
                 Vector2 worldPos = grid.GridToWorld(gridPos);
-                GameObject box = Instantiate(boxPrefab, worldPos, Quaternion.identity, transform);
+
+                // Spawn treasure box at random position, regular box otherwise
+                GameObject prefabToSpawn = (i == treasureIndex) ? treasureBoxPrefab : boxPrefab;
+                GameObject box = Instantiate(prefabToSpawn, worldPos, Quaternion.identity, transform);
                 spawnedBoxes.Add(box);
+
+                if (i == treasureIndex)
+                {
+                    Debug.Log($"Treasure box spawned at {worldPos}!");
+                }
             }
         }
         

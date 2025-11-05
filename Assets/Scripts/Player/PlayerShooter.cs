@@ -7,11 +7,13 @@ namespace ITWaves.Player
     public class PlayerShooter : MonoBehaviour
     {
         [Header("Shooting Settings")]
-        [SerializeField, Tooltip("Fire rate (shots per second).")]
-        private float fireRate = 5f;
+        [SerializeField, Tooltip("Base fire rate (shots per second).")]
+        private float baseFireRate = 5f;
 
         [SerializeField, Tooltip("Enable automatic fire when holding button.")]
         private bool automaticFire = true;
+
+        private float fireRate; // Current fire rate (can be boosted)
 
         [SerializeField, Tooltip("Bullet spawn offset from player.")]
         private float bulletSpawnOffset = 0.5f;
@@ -33,6 +35,7 @@ namespace ITWaves.Player
         {
             controller = GetComponent<PlayerController>();
             audioSource = GetComponent<AudioSource>();
+            fireRate = baseFireRate; // Initialize current fire rate
         }
         
         public void OnAttack(InputValue value)
@@ -119,6 +122,34 @@ namespace ITWaves.Player
             {
                 audioSource.PlayOneShot(shootSound);
             }
+        }
+
+        /// <summary>
+        /// Increases the fire rate by the specified amount.
+        /// Called by power-ups like treasure boxes.
+        /// </summary>
+        public void IncreaseFireRate(float amount)
+        {
+            float oldRate = fireRate;
+            fireRate += amount;
+            Debug.Log($"[PlayerShooter] Fire rate increased from {oldRate} to {fireRate} shots/sec (boost: +{amount})");
+        }
+
+        /// <summary>
+        /// Resets fire rate to base value.
+        /// </summary>
+        public void ResetFireRate()
+        {
+            fireRate = baseFireRate;
+            Debug.Log($"[PlayerShooter] Fire rate reset to base: {fireRate} shots/sec");
+        }
+
+        /// <summary>
+        /// Get current fire rate.
+        /// </summary>
+        public float GetFireRate()
+        {
+            return fireRate;
         }
     }
 }

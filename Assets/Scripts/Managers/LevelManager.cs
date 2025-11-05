@@ -91,7 +91,7 @@ namespace ITWaves
             // Generate layout
             if (layoutGenerator != null && levelConfig != null && difficultyProfile != null)
             {
-                layoutGenerator.Generate(levelConfig, difficultyProfile, difficulty);
+                layoutGenerator.Generate(levelConfig, difficultyProfile, difficulty, currentWave);
             }
 
             // Spawn player at centre
@@ -271,7 +271,7 @@ namespace ITWaves
             // Regenerate layout with increased difficulty (boxes will be in different positions)
             if (layoutGenerator != null && levelConfig != null && difficultyProfile != null)
             {
-                layoutGenerator.Generate(levelConfig, difficultyProfile, difficulty);
+                layoutGenerator.Generate(levelConfig, difficultyProfile, difficulty, currentWave);
             }
 
             // Spawn new snake with more segments
