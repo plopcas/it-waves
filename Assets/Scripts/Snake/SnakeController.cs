@@ -309,13 +309,8 @@ namespace ITWaves.Snake
             isVisible = false;
             enabled = false;
 
-            // Save final score
-            if (Core.GameManager.Instance != null)
-            {
-                Core.GameManager.Instance.SaveFinalScore();
-            }
-
             // Notify LevelManager to handle game over
+            // LevelManager will handle score saving (score from wave start is already saved)
             var levelManager = ITWaves.LevelManager.Instance;
             if (levelManager != null)
             {

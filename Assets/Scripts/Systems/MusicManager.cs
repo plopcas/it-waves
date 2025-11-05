@@ -3,10 +3,8 @@ using UnityEngine.SceneManagement;
 
 namespace ITWaves.Systems
 {
-    /// <summary>
-    /// Manages background music across scenes with smooth transitions.
-    /// Singleton pattern ensures music persists across scene loads.
-    /// </summary>
+    // Manages background music across scenes with smooth transitions.
+    // Singleton pattern ensures music persists across scene loads.
     [RequireComponent(typeof(AudioSource))]
     public class MusicManager : MonoBehaviour
     {
@@ -133,9 +131,7 @@ namespace ITWaves.Systems
             }
         }
 
-        /// <summary>
-        /// Play a music clip with smooth transition.
-        /// </summary>
+        // Play a music clip with smooth transition.
         public void PlayMusic(AudioClip clip)
         {
             if (clip == null)
@@ -167,9 +163,7 @@ namespace ITWaves.Systems
             }
         }
 
-        /// <summary>
-        /// Stop music with fade out.
-        /// </summary>
+        // Stop music with fade out.
         public void StopMusic()
         {
             if (audioSource.isPlaying)
@@ -178,9 +172,7 @@ namespace ITWaves.Systems
             }
         }
 
-        /// <summary>
-        /// Set music volume.
-        /// </summary>
+        // Set music volume.
         public void SetVolume(float volume)
         {
             musicVolume = Mathf.Clamp01(volume);
@@ -190,9 +182,7 @@ namespace ITWaves.Systems
             }
         }
 
-        /// <summary>
-        /// Get current music volume.
-        /// </summary>
+        // Get current music volume.
         public float GetVolume()
         {
             return musicVolume;

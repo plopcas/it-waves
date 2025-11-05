@@ -33,9 +33,18 @@ namespace ITWaves.UI
                 LevelManager.Instance.OnWaveStarted += HandleWaveStarted;
             }
 
-            // Initialize display
-            SetWave(1);
-            SetScore(0);
+            if (Core.GameManager.Instance != null)
+            {
+                Core.GameManager.Instance.OnScoreChanged += SetScore;
+                // Initialize display with current values from GameManager
+                SetWave(Core.GameManager.Instance.CurrentWave);
+                SetScore(Core.GameManager.Instance.CurrentScore);
+            }
+            else
+            {
+                SetWave(1);
+                SetScore(0);
+            }
 
             // Hide message text initially
             if (messageText != null)
@@ -68,8 +77,8 @@ namespace ITWaves.UI
 
         private void HandleGameStarted()
         {
-            SetWave(1);
-            SetScore(0);
+            // Don't reset score here - it's managed by GameManager
+            // Wave is set by HandleWaveStarted event
         }
 
         private void HandleWaveStarted(int waveNumber)
@@ -77,9 +86,7 @@ namespace ITWaves.UI
             SetWave(waveNumber);
         }
 
-        /// <summary>
-        /// Display a temporary message in the center of the screen.
-        /// </summary>
+        // Display a temporary message in the center of the screen.
         public void ShowMessage(string message)
         {
             if (messageText == null) return;
@@ -111,6 +118,11 @@ namespace ITWaves.UI
             {
                 LevelManager.Instance.OnGameStarted -= HandleGameStarted;
                 LevelManager.Instance.OnWaveStarted -= HandleWaveStarted;
+            }
+
+            if (Core.GameManager.Instance != null)
+            {
+                Core.GameManager.Instance.OnScoreChanged -= SetScore;
             }
         }
     }

@@ -36,6 +36,14 @@ namespace ITWaves.Player
             controller = GetComponent<PlayerController>();
             audioSource = GetComponent<AudioSource>();
             fireRate = baseFireRate; // Initialize current fire rate
+
+            // Apply saved fire rate boost if any
+            float savedBoost = SaveManager.GetFireRateBoost();
+            if (savedBoost > 0f)
+            {
+                fireRate += savedBoost;
+                Debug.Log($"[PlayerShooter] Applied saved fire rate boost: +{savedBoost}. Current fire rate: {fireRate} shots/sec");
+            }
         }
         
         public void OnAttack(InputValue value)
@@ -124,10 +132,8 @@ namespace ITWaves.Player
             }
         }
 
-        /// <summary>
-        /// Increases the fire rate by the specified amount.
-        /// Called by power-ups like treasure boxes.
-        /// </summary>
+        // Increases the fire rate by the specified amount.
+        // Called by power-ups like treasure boxes.
         public void IncreaseFireRate(float amount)
         {
             float oldRate = fireRate;
@@ -135,18 +141,14 @@ namespace ITWaves.Player
             Debug.Log($"[PlayerShooter] Fire rate increased from {oldRate} to {fireRate} shots/sec (boost: +{amount})");
         }
 
-        /// <summary>
-        /// Resets fire rate to base value.
-        /// </summary>
+        // Resets fire rate to base value.
         public void ResetFireRate()
         {
             fireRate = baseFireRate;
             Debug.Log($"[PlayerShooter] Fire rate reset to base: {fireRate} shots/sec");
         }
 
-        /// <summary>
-        /// Get current fire rate.
-        /// </summary>
+        // Get current fire rate.
         public float GetFireRate()
         {
             return fireRate;

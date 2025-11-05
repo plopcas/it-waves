@@ -4,10 +4,8 @@ using ITWaves.Systems;
 
 namespace ITWaves.Player
 {
-    /// <summary>
-    /// Simple one-touch death system for the player.
-    /// Any damage instantly kills the player.
-    /// </summary>
+    // Simple one-touch death system for the player.
+    // Any damage instantly kills the player.
     public class PlayerHealth : MonoBehaviour, IDamageable
     {
         [Header("Visual Feedback")]

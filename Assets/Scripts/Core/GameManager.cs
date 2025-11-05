@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using ITWaves.Systems;
 
 namespace ITWaves.Core
 {
@@ -24,15 +25,21 @@ namespace ITWaves.Core
         
         private void Awake()
         {
-            // Singleton pattern
+            // Simple singleton - no DontDestroyOnLoad, gets recreated with each Game scene
             if (instance != null && instance != this)
             {
-                Destroy(gameObject);
+                Destroy(this);
                 return;
             }
-            
+
             instance = this;
-            DontDestroyOnLoad(gameObject);
+
+            // Restore score from SaveManager
+            currentScore = SaveManager.GetCurrentScore();
+            if (currentScore > 0)
+            {
+                OnScoreChanged?.Invoke(currentScore);
+            }
         }
         
         private void Start()
@@ -76,13 +83,6 @@ namespace ITWaves.Core
             currentWave = 1;
             OnScoreChanged?.Invoke(currentScore);
             OnWaveChanged?.Invoke(currentWave);
-        }
-
-        public void SaveFinalScore()
-        {
-            PlayerPrefs.SetInt("FinalScore", currentScore);
-            PlayerPrefs.SetInt("DeathWave", currentWave);
-            PlayerPrefs.Save();
         }
 
         private void HandleGameStarted()

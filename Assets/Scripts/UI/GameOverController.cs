@@ -3,6 +3,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using TMPro;
 using ITWaves.Systems;
+using ITWaves.Core;
 
 namespace ITWaves.UI
 {
@@ -41,26 +42,26 @@ namespace ITWaves.UI
         
         private void DisplayFinalStats()
         {
-            // Get final score and wave from PlayerPrefs (saved by GameManager)
-            int finalScore = PlayerPrefs.GetInt("FinalScore", 0);
-            int deathWave = PlayerPrefs.GetInt("DeathWave", 1);
-            
+            // Get scores and wave from SaveManager
+            int deathScore = SaveManager.GetDeathScore(); // Score when player died
+            int continueScore = SaveManager.GetCurrentScore(); // Score they'll have when continuing
+            int deathWave = SaveManager.GetDeathWave();
+
             if (waveText != null)
             {
                 waveText.text = $"WAVE: {deathWave}";
             }
-            
+
             if (scoreText != null)
             {
-                scoreText.text = $"SCORE: {finalScore}";
+                // Show both scores: what they achieved and what they'll continue with
+                scoreText.text = $"SCORE: {deathScore} -> {continueScore}";
             }
         }
-        
+
         private void HandleContinue()
         {
-            // Continue from highest wave reached
-            int highestWave = SaveManager.GetHighestWaveReached();
-            PlayerPrefs.SetInt("StartWave", highestWave);
+            // Continue from highest wave reached - score is already saved in SaveManager
             SceneManager.LoadScene("Game");
         }
         

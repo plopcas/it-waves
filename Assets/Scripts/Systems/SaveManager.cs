@@ -109,7 +109,11 @@ namespace ITWaves.Systems
 
             Debug.Log("Resetting progress to wave 1");
             cachedSaveData.highestWaveReached = 1;
+            cachedSaveData.currentScore = 0;
+            cachedSaveData.deathScore = 0;
+            cachedSaveData.deathWave = 1;
             cachedSaveData.treasureCollected = false; // Reset treasure status on new game
+            cachedSaveData.fireRateBoost = 0f; // Reset fire rate boost on new game
             Save(cachedSaveData);
         }
 
@@ -131,6 +135,77 @@ namespace ITWaves.Systems
 
             Debug.Log($"Setting treasure collected: {collected}");
             cachedSaveData.treasureCollected = collected;
+            Save(cachedSaveData);
+        }
+
+        public static float GetFireRateBoost()
+        {
+            if (cachedSaveData == null)
+            {
+                cachedSaveData = Load();
+            }
+            return cachedSaveData.fireRateBoost;
+        }
+
+        public static void AddFireRateBoost(float boost)
+        {
+            if (cachedSaveData == null)
+            {
+                cachedSaveData = Load();
+            }
+
+            cachedSaveData.fireRateBoost += boost;
+            Debug.Log($"Fire rate boost increased by {boost}. Total boost: {cachedSaveData.fireRateBoost}");
+            Save(cachedSaveData);
+        }
+
+        public static int GetCurrentScore()
+        {
+            if (cachedSaveData == null)
+            {
+                cachedSaveData = Load();
+            }
+            return cachedSaveData.currentScore;
+        }
+
+        public static void SaveScore(int score, int wave)
+        {
+            if (cachedSaveData == null)
+            {
+                cachedSaveData = Load();
+            }
+
+            cachedSaveData.currentScore = score;
+            cachedSaveData.deathWave = wave;
+            Save(cachedSaveData);
+        }
+
+        public static int GetDeathWave()
+        {
+            if (cachedSaveData == null)
+            {
+                cachedSaveData = Load();
+            }
+            return cachedSaveData.deathWave;
+        }
+
+        public static int GetDeathScore()
+        {
+            if (cachedSaveData == null)
+            {
+                cachedSaveData = Load();
+            }
+            return cachedSaveData.deathScore;
+        }
+
+        public static void SaveDeathScore(int score)
+        {
+            if (cachedSaveData == null)
+            {
+                cachedSaveData = Load();
+            }
+
+            cachedSaveData.deathScore = score;
             Save(cachedSaveData);
         }
 

@@ -4,9 +4,7 @@ using ITWaves.Systems;
 
 namespace ITWaves.Props
 {
-    /// <summary>
-    /// Special treasure box that grants fire rate boost when destroyed.
-    /// </summary>
+    // Special treasure box that grants fire rate boost when destroyed.
     [RequireComponent(typeof(Collider2D))]
     public class TreasureBox : MonoBehaviour, IDamageable
     {
@@ -136,8 +134,9 @@ namespace ITWaves.Props
                 yield break;
             }
 
-            // Mark treasure as collected in save data
+            // Mark treasure as collected in save data and save the fire rate boost
             SaveManager.SetTreasureCollected(true);
+            SaveManager.AddFireRateBoost(fireRateBoost);
 
             // Pause the game
             float originalTimeScale = Time.timeScale;

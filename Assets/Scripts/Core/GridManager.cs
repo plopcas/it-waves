@@ -46,6 +46,14 @@ namespace ITWaves.Core
             CalculateGridDimensions();
         }
 
+        private void OnDestroy()
+        {
+            if (Instance == this)
+            {
+                Instance = null;
+            }
+        }
+
         private void CalculateGridDimensions()
         {
             if (mainCamera == null)

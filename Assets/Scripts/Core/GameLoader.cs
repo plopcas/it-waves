@@ -60,12 +60,6 @@ namespace ITWaves.Core
         {
             SceneManager.LoadScene("MainMenu");
         }
-
-        public static void LoadGame(int levelIndex)
-        {
-            PlayerPrefs.SetInt("StartLevel", levelIndex);
-            SceneManager.LoadScene("Game");
-        }
     }
 }
 

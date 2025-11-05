@@ -62,6 +62,8 @@ namespace ITWaves
 
         private void Start()
         {
+            Debug.Log($"LevelManager Start() called. Scene: {SceneManager.GetActiveScene().name}");
+
             // Auto-start if in Game scene
             if (SceneManager.GetActiveScene().name == "Game")
             {
@@ -72,9 +74,10 @@ namespace ITWaves
                     return;
                 }
 
-                // Check if we should start from a specific wave (for continue functionality)
-                int startWave = PlayerPrefs.GetInt("StartWave", 1);
-                PlayerPrefs.DeleteKey("StartWave"); // Clear it after reading
+                Debug.Log("GridManager found, starting from highest wave");
+
+                // Start from highest wave reached
+                int startWave = SaveManager.GetHighestWaveReached();
                 Debug.Log($"Starting game at wave {startWave}");
                 StartGame(startWave);
             }
@@ -113,10 +116,8 @@ namespace ITWaves
             OnWaveStarted?.Invoke(currentWave);
         }
 
-        /// <summary>
-        /// Calculate difficulty level based on current wave.
-        /// Every 2 waves increases difficulty by 1 level.
-        /// </summary>
+        // Calculate difficulty level based on current wave.
+        // Every 2 waves increases difficulty by 1 level.
         private int GetWaveDifficulty()
         {
             // Start at difficulty 1, increase by 1 every 2 waves
@@ -193,8 +194,16 @@ namespace ITWaves
             currentWave++;
 
             // Save progress - player completed previous wave and is now on this wave
-            Debug.Log($"Saving progress: Wave {currentWave}");
+            Debug.Log($"Wave completed! Saving progress: Wave {currentWave}");
             SaveManager.UpdateHighestWave(currentWave);
+
+            // Save current score (player completed the wave with this score)
+            if (Core.GameManager.Instance != null)
+            {
+                int currentScore = Core.GameManager.Instance.CurrentScore;
+                SaveManager.SaveScore(currentScore, currentWave);
+                Debug.Log($"Wave completed - saved score: {currentScore}");
+            }
 
             // Restart the wave with increased difficulty
             Invoke(nameof(RestartWave), 2f);
@@ -248,12 +257,17 @@ namespace ITWaves
                 layoutGenerator.ClearLayout();
             }
 
-            // Save final score (optional - requires GameManager in scene)
-            // var gameManager = FindFirstObjectByType<ITWaves.Core.GameManager>();
-            // if (gameManager != null)
-            // {
-            //     gameManager.SaveFinalScore();
-            // }
+            // Save progress - player reached this wave (even though they died on it)
+            Debug.Log($"Player died on wave {currentWave}, saving as highest wave reached");
+            SaveManager.UpdateHighestWave(currentWave);
+
+            // Save death score for GameOver display (but continue score is already saved from wave start)
+            if (Core.GameManager.Instance != null)
+            {
+                int deathScore = Core.GameManager.Instance.CurrentScore;
+                SaveManager.SaveDeathScore(deathScore);
+                Debug.Log($"Player died with score: {deathScore}");
+            }
 
             OnPlayerDied?.Invoke();
 
@@ -264,6 +278,14 @@ namespace ITWaves
         private void RestartWave()
         {
             isLevelActive = true;
+
+            // Save current score at wave start (so we can restore it if player dies)
+            if (Core.GameManager.Instance != null)
+            {
+                int currentScore = Core.GameManager.Instance.CurrentScore;
+                SaveManager.SaveScore(currentScore, currentWave);
+                Debug.Log($"Wave {currentWave} started - saved score: {currentScore}");
+            }
 
             // Calculate difficulty based on new wave
             int difficulty = GetWaveDifficulty();
