@@ -479,7 +479,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: ITWaves.Runtime::ITWaves.Core.GameLoader
   autoLoadMainMenu: 1
-  loadDelay: 0.5
+  loadDelay: 3.7
+  musicManagerPrefab: {fileID: 2843178992477061079, guid: df79b8b7ce98ed3488cd28ac8fc73e58, type: 3}
 --- !u!4 &1164740748
 Transform:
   m_ObjectHideFlags: 0
