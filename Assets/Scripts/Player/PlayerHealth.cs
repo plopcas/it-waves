@@ -1,144 +1,70 @@
 using System;
-using System.Collections;
 using UnityEngine;
 using ITWaves.Systems;
 
 namespace ITWaves.Player
 {
+    /// <summary>
+    /// Simple one-touch death system for the player.
+    /// Any damage instantly kills the player.
+    /// </summary>
     public class PlayerHealth : MonoBehaviour, IDamageable
     {
-        [Header("Health Settings")]
-        [SerializeField, Tooltip("Maximum health.")]
-        private int maxHealth = 3;
-        
-        [SerializeField, Tooltip("Invulnerability duration after taking damage.")]
-        private float iFramesDuration = 1f;
-        
         [Header("Visual Feedback")]
-        [SerializeField, Tooltip("Sprite renderer for flashing.")]
-        private SpriteRenderer spriteRenderer;
-        
-        [SerializeField, Tooltip("Flash colour during i-frames.")]
-        private Color iFramesColour = new Color(1f, 1f, 1f, 0.5f);
-        
-        private int currentHealth;
-        private bool isInvulnerable;
-        private Color originalColour;
+        [SerializeField, Tooltip("Hit flash component (optional).")]
         private HitFlash hitFlash;
-        
-        public int CurrentHealth => currentHealth;
-        public int MaxHealth => maxHealth;
-        public bool IsAlive => currentHealth > 0;
-        
+
+        private bool isAlive = true;
+
+        public bool IsAlive => isAlive;
+
         // Events
-        public event Action<int, int> OnHealthChanged; // current, max
         public event Action OnDied;
-        
+
         private void Awake()
         {
-            currentHealth = maxHealth;
-            
-            if (spriteRenderer == null)
+            if (hitFlash == null)
             {
-                spriteRenderer = GetComponent<SpriteRenderer>();
+                hitFlash = GetComponent<HitFlash>();
             }
-            
-            if (spriteRenderer != null)
-            {
-                originalColour = spriteRenderer.color;
-            }
-            
-            hitFlash = GetComponent<HitFlash>();
         }
-        
-        private void Start()
-        {
-            OnHealthChanged?.Invoke(currentHealth, maxHealth);
-        }
-        
+
         public void ApplyDamage(float amount, GameObject source = null)
         {
-            if (isInvulnerable || !IsAlive)
+            if (!isAlive)
             {
                 return;
             }
-            
-            int damage = Mathf.RoundToInt(amount);
-            currentHealth = Mathf.Max(0, currentHealth - damage);
-            
-            OnHealthChanged?.Invoke(currentHealth, maxHealth);
-            
-            if (currentHealth <= 0)
-            {
-                HandleDeath();
-            }
-            else
-            {
-                StartCoroutine(InvulnerabilityRoutine());
-                
-                if (hitFlash != null)
-                {
-                    hitFlash.Flash();
-                }
-            }
+
+            // One-touch death - any damage kills the player
+            HandleDeath();
         }
-        
-        private IEnumerator InvulnerabilityRoutine()
-        {
-            isInvulnerable = true;
-            
-            float elapsed = 0f;
-            while (elapsed < iFramesDuration)
-            {
-                elapsed += Time.deltaTime;
-                
-                // Flash effect
-                if (spriteRenderer != null)
-                {
-                    float t = Mathf.PingPong(elapsed * 10f, 1f);
-                    spriteRenderer.color = Color.Lerp(originalColour, iFramesColour, t);
-                }
-                
-                yield return null;
-            }
-            
-            if (spriteRenderer != null)
-            {
-                spriteRenderer.color = originalColour;
-            }
-            
-            isInvulnerable = false;
-        }
-        
+
         private void HandleDeath()
         {
-            OnDied?.Invoke();
-            
+            isAlive = false;
+
+            // Flash effect on death
+            if (hitFlash != null)
+            {
+                hitFlash.Flash();
+            }
+
             // Disable controls
             var controller = GetComponent<PlayerController>();
             if (controller != null)
             {
                 controller.enabled = false;
             }
-            
+
             var shooter = GetComponent<PlayerShooter>();
             if (shooter != null)
             {
                 shooter.enabled = false;
             }
-            
-            // Optional: play death animation/effect
-        }
-        
-        public void Heal(int amount)
-        {
-            if (!IsAlive)
-            {
-                return;
-            }
-            
-            currentHealth = Mathf.Min(maxHealth, currentHealth + amount);
-            OnHealthChanged?.Invoke(currentHealth, maxHealth);
+
+            // Notify listeners
+            OnDied?.Invoke();
         }
     }
 }
