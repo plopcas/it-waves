@@ -12,14 +12,11 @@ namespace ITWaves
     {
         public static LevelManager Instance { get; private set; }
 
-        [Header("Level Configuration")]
-        [SerializeField, Tooltip("Current level index (1-20).")]
-        private int currentLevel = 1;
-
+        [Header("Configuration")]
         [SerializeField, Tooltip("Level configuration.")]
         private LevelConfig levelConfig;
 
-        [SerializeField, Tooltip("Difficulty profile for all levels.")]
+        [SerializeField, Tooltip("Difficulty profile (scales with waves).")]
         private LevelDifficultyProfile difficultyProfile;
 
         [Header("References")]
@@ -36,23 +33,22 @@ namespace ITWaves
         private GameObject playerPrefab;
 
         [Header("State")]
-        [SerializeField, Tooltip("Is level currently active.")]
+        [SerializeField, Tooltip("Is game currently active.")]
         private bool isLevelActive;
 
-        [SerializeField, Tooltip("Current wave number within the level.")]
+        [SerializeField, Tooltip("Current wave number (starts at 1).")]
         private int currentWave = 1;
 
         private GameObject currentPlayer;
         private SnakeController currentSnake;
 
-        public int CurrentLevel => currentLevel;
         public bool IsLevelActive => isLevelActive;
         public int CurrentWave => currentWave;
 
         // Events
-        public event Action<int> OnLevelStarted;
+        public event Action OnGameStarted;
         public event Action OnPlayerDied;
-        public event Action<int, int> OnWaveStarted; // (level, wave)
+        public event Action<int> OnWaveStarted; // (wave)
 
         private void Awake()
         {
@@ -76,20 +72,22 @@ namespace ITWaves
                     return;
                 }
 
-                StartRun(currentLevel);
+                StartGame();
             }
         }
 
-        public void StartRun(int levelIndex)
+        public void StartGame()
         {
-            currentLevel = Mathf.Clamp(levelIndex, 1, 20);
-            currentWave = 1; // Reset wave counter when starting a new level
+            currentWave = 1;
             isLevelActive = true;
+
+            // Calculate difficulty based on wave
+            int difficulty = GetWaveDifficulty();
 
             // Generate layout
             if (layoutGenerator != null && levelConfig != null && difficultyProfile != null)
             {
-                layoutGenerator.Generate(levelConfig, difficultyProfile, currentLevel);
+                layoutGenerator.Generate(levelConfig, difficultyProfile, difficulty);
             }
 
             // Spawn player at centre
@@ -101,13 +99,26 @@ namespace ITWaves
             // Start enemy spawning
             if (enemySpawner != null && difficultyProfile != null)
             {
-                enemySpawner.SetLevel(currentLevel);
-                enemySpawner.SetSpawnRate(difficultyProfile.GetEnemySpawnRate(currentLevel));
-                enemySpawner.SetMaxActive(difficultyProfile.GetEnemyCap(currentLevel));
+                enemySpawner.SetLevel(difficulty);
+                enemySpawner.SetSpawnRate(difficultyProfile.GetEnemySpawnRate(difficulty));
+                enemySpawner.SetMaxActive(difficultyProfile.GetEnemyCap(difficulty));
                 enemySpawner.StartSpawning();
             }
 
-            OnLevelStarted?.Invoke(currentLevel);
+            OnGameStarted?.Invoke();
+        }
+
+        /// <summary>
+        /// Calculate difficulty level based on current wave.
+        /// Every 2 waves increases difficulty by 1 level.
+        /// </summary>
+        private int GetWaveDifficulty()
+        {
+            // Start at difficulty 1, increase by 1 every 2 waves
+            int difficulty = 1 + (currentWave - 1) / 2;
+
+            // Cap at level 20 to stay within difficulty curve bounds
+            return Mathf.Clamp(difficulty, 1, 20);
         }
 
         private void SpawnPlayer()
@@ -142,11 +153,15 @@ namespace ITWaves
                 ? layoutGenerator.GetRandomEdgeSpawnPosition(levelConfig)
                 : new Vector2(10f, 10f);
 
-            // Calculate segment count: base segments for level + (wave - 1) additional segments
-            int baseSegments = difficultyProfile.GetSnakeSegments(currentLevel);
+            // Calculate difficulty for snake speed
+            int difficulty = GetWaveDifficulty();
+
+            // Calculate segment count: base segments + (wave - 1) additional segments
+            int baseSegments = difficultyProfile.GetSnakeSegments(1); // Always use base from difficulty 1
             int segmentCount = baseSegments + (currentWave - 1);
 
-            currentSnake = snakeSpawner.SpawnWithSegmentCount(spawnPos, currentLevel, segmentCount);
+            // Use wave difficulty for snake speed, segment count for length
+            currentSnake = snakeSpawner.SpawnWithSegmentCount(spawnPos, difficulty, segmentCount);
 
             // Snake now uses segment-based damage system
             // No need to subscribe to health events - snake handles its own lifecycle
@@ -193,15 +208,16 @@ namespace ITWaves
                 layoutGenerator.ClearLayout();
             }
 
-            if (currentLevel >= 20)
+            // Check if player has reached a high wave milestone (e.g., wave 20)
+            if (currentWave >= 20)
             {
                 // Victory!
-                SaveManager.UpdateHighestLevel(20);
+                SaveManager.UpdateHighestLevel(currentWave);
                 Invoke(nameof(LoadWinScene), 2f);
             }
             else
             {
-                // Shouldn't happen, but treat as escape
+                // Snake defeated means wave complete - start next wave
                 HandleSnakeEscaped();
             }
         }
@@ -240,26 +256,29 @@ namespace ITWaves
         {
             isLevelActive = true;
 
-            // Regenerate layout
+            // Calculate difficulty based on new wave
+            int difficulty = GetWaveDifficulty();
+
+            // Regenerate layout with increased difficulty (boxes will be in different positions)
             if (layoutGenerator != null && levelConfig != null && difficultyProfile != null)
             {
-                layoutGenerator.Generate(levelConfig, difficultyProfile, currentLevel);
+                layoutGenerator.Generate(levelConfig, difficultyProfile, difficulty);
             }
 
             // Spawn new snake with more segments
             SpawnSnake();
 
-            // Restart enemy spawning
+            // Restart enemy spawning with increased difficulty
             if (enemySpawner != null && difficultyProfile != null)
             {
-                enemySpawner.SetLevel(currentLevel);
-                enemySpawner.SetSpawnRate(difficultyProfile.GetEnemySpawnRate(currentLevel));
-                enemySpawner.SetMaxActive(difficultyProfile.GetEnemyCap(currentLevel));
+                enemySpawner.SetLevel(difficulty);
+                enemySpawner.SetSpawnRate(difficultyProfile.GetEnemySpawnRate(difficulty));
+                enemySpawner.SetMaxActive(difficultyProfile.GetEnemyCap(difficulty));
                 enemySpawner.StartSpawning();
             }
 
             // Notify listeners that a new wave has started
-            OnWaveStarted?.Invoke(currentLevel, currentWave);
+            OnWaveStarted?.Invoke(currentWave);
         }
 
         private void LoadWinScene()

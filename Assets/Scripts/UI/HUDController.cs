@@ -35,7 +35,7 @@ namespace ITWaves.UI
             // Subscribe to events
             if (LevelManager.Instance != null)
             {
-                LevelManager.Instance.OnLevelStarted += HandleLevelStarted;
+                LevelManager.Instance.OnGameStarted += HandleGameStarted;
                 LevelManager.Instance.OnWaveStarted += HandleWaveStarted;
             }
 
@@ -72,19 +72,11 @@ namespace ITWaves.UI
             }
         }
         
-        public void SetLevel(int levelIndex)
+        public void SetWave(int waveNumber)
         {
             if (levelText != null)
             {
-                // Check if we're in a wave-based level
-                if (LevelManager.Instance != null && LevelManager.Instance.CurrentWave > 1)
-                {
-                    levelText.text = $"Level {levelIndex} - Wave {LevelManager.Instance.CurrentWave}";
-                }
-                else
-                {
-                    levelText.text = $"Level {levelIndex}";
-                }
+                levelText.text = $"Wave {waveNumber}";
             }
         }
         
@@ -128,18 +120,18 @@ namespace ITWaves.UI
             SetScore(currentScore + value);
         }
         
-        private void HandleLevelStarted(int levelIndex)
+        private void HandleGameStarted()
         {
-            SetLevel(levelIndex);
+            SetWave(1);
 
-            // Re-find player and snake for new level
+            // Re-find player and snake for new game
             Invoke(nameof(FindAndSubscribeToPlayer), 0.1f);
             Invoke(nameof(FindAndSubscribeToSnake), 0.1f);
         }
 
-        private void HandleWaveStarted(int levelIndex, int waveNumber)
+        private void HandleWaveStarted(int waveNumber)
         {
-            SetLevel(levelIndex);
+            SetWave(waveNumber);
 
             // Re-find snake for new wave
             Invoke(nameof(FindAndSubscribeToSnake), 0.1f);
@@ -154,7 +146,7 @@ namespace ITWaves.UI
         {
             if (LevelManager.Instance != null)
             {
-                LevelManager.Instance.OnLevelStarted -= HandleLevelStarted;
+                LevelManager.Instance.OnGameStarted -= HandleGameStarted;
                 LevelManager.Instance.OnWaveStarted -= HandleWaveStarted;
             }
         }

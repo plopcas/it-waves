@@ -16,15 +16,18 @@ namespace ITWaves.Level
 
         private List<GameObject> spawnedBoxes = new List<GameObject>();
         private System.Random rng;
-        
-        public void Generate(LevelConfig config, LevelDifficultyProfile difficulty, int levelIndex)
+        private int generationCounter = 0; // Track how many times we've generated to vary seed
+
+        public void Generate(LevelConfig config, LevelDifficultyProfile difficulty, int difficultyLevel)
         {
             // Clear previous layout
             ClearLayout();
 
-            // Initialize RNG with seed
-            int seed = config.seed != 0 ? config.seed : levelIndex;
+            // Initialize RNG with a seed that changes each wave
+            // Use Time.frameCount and generationCounter to ensure different layouts each time
+            int seed = config.seed != 0 ? config.seed + generationCounter : (Time.frameCount + generationCounter);
             rng = new System.Random(seed);
+            generationCounter++;
 
             if (!config.useProcedural)
             {
@@ -39,7 +42,7 @@ namespace ITWaves.Level
 
             // Calculate box count based on density and grid area
             int gridArea = GridManager.Instance.GridWidth * GridManager.Instance.GridHeight;
-            float density = difficulty.GetBoxDensity(levelIndex);
+            float density = difficulty.GetBoxDensity(difficultyLevel);
             int boxCount = Mathf.RoundToInt((gridArea / 100f) * density);
 
             // Generate boxes

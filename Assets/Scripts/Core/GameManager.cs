@@ -11,16 +11,16 @@ namespace ITWaves.Core
         [Header("Game State")]
         [SerializeField, Tooltip("Current score.")]
         private int currentScore;
-        
-        [SerializeField, Tooltip("Current level.")]
-        private int currentLevel = 1;
-        
+
+        [SerializeField, Tooltip("Current wave.")]
+        private int currentWave = 1;
+
         // Events
         public event Action<int> OnScoreChanged;
-        public event Action<int> OnLevelChanged;
-        
+        public event Action<int> OnWaveChanged;
+
         public int CurrentScore => currentScore;
-        public int CurrentLevel => currentLevel;
+        public int CurrentWave => currentWave;
         
         private void Awake()
         {
@@ -40,7 +40,8 @@ namespace ITWaves.Core
             // Subscribe to level manager events
             if (LevelManager.Instance != null)
             {
-                LevelManager.Instance.OnLevelStarted += HandleLevelStarted;
+                LevelManager.Instance.OnGameStarted += HandleGameStarted;
+                LevelManager.Instance.OnWaveStarted += HandleWaveStarted;
             }
         }
 
@@ -48,7 +49,7 @@ namespace ITWaves.Core
         {
             currentScore += amount;
             OnScoreChanged?.Invoke(currentScore);
-            
+
             // Update HUD if available
             var hud = FindFirstObjectByType<UI.HUDController>();
             if (hud != null)
@@ -63,42 +64,48 @@ namespace ITWaves.Core
             OnScoreChanged?.Invoke(currentScore);
         }
 
-        public void SetLevel(int level)
+        public void SetWave(int wave)
         {
-            currentLevel = level;
-            OnLevelChanged?.Invoke(currentLevel);
+            currentWave = wave;
+            OnWaveChanged?.Invoke(currentWave);
         }
 
         public void ResetGameState()
         {
             currentScore = 0;
-            currentLevel = 1;
+            currentWave = 1;
             OnScoreChanged?.Invoke(currentScore);
-            OnLevelChanged?.Invoke(currentLevel);
+            OnWaveChanged?.Invoke(currentWave);
         }
 
         public void SaveFinalScore()
         {
             PlayerPrefs.SetInt("FinalScore", currentScore);
-            PlayerPrefs.SetInt("DeathLevel", currentLevel);
+            PlayerPrefs.SetInt("DeathWave", currentWave);
             PlayerPrefs.Save();
         }
-        
-        private void HandleLevelStarted(int levelIndex)
+
+        private void HandleGameStarted()
         {
-            SetLevel(levelIndex);
+            SetWave(1);
         }
-        
+
+        private void HandleWaveStarted(int waveNumber)
+        {
+            SetWave(waveNumber);
+        }
+
         private void OnDestroy()
         {
             if (instance == this)
             {
                 instance = null;
             }
-            
+
             if (LevelManager.Instance != null)
             {
-                LevelManager.Instance.OnLevelStarted -= HandleLevelStarted;
+                LevelManager.Instance.OnGameStarted -= HandleGameStarted;
+                LevelManager.Instance.OnWaveStarted -= HandleWaveStarted;
             }
         }
     }
