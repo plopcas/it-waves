@@ -72,13 +72,17 @@ namespace ITWaves
                     return;
                 }
 
-                StartGame();
+                // Check if we should start from a specific wave (for continue functionality)
+                int startWave = PlayerPrefs.GetInt("StartWave", 1);
+                PlayerPrefs.DeleteKey("StartWave"); // Clear it after reading
+                Debug.Log($"Starting game at wave {startWave}");
+                StartGame(startWave);
             }
         }
 
-        public void StartGame()
+        public void StartGame(int startingWave = 1)
         {
-            currentWave = 1;
+            currentWave = startingWave;
             isLevelActive = true;
 
             // Calculate difficulty based on wave
@@ -106,6 +110,7 @@ namespace ITWaves
             }
 
             OnGameStarted?.Invoke();
+            OnWaveStarted?.Invoke(currentWave);
         }
 
         /// <summary>
@@ -187,6 +192,10 @@ namespace ITWaves
             // Increment wave counter
             currentWave++;
 
+            // Save progress - player completed previous wave and is now on this wave
+            Debug.Log($"Saving progress: Wave {currentWave}");
+            SaveManager.UpdateHighestWave(currentWave);
+
             // Restart the wave with increased difficulty
             Invoke(nameof(RestartWave), 2f);
         }
@@ -212,7 +221,7 @@ namespace ITWaves
             if (currentWave >= 20)
             {
                 // Victory!
-                SaveManager.UpdateHighestLevel(currentWave);
+                SaveManager.UpdateHighestWave(currentWave);
                 Invoke(nameof(LoadWinScene), 2f);
             }
             else

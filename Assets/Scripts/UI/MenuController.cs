@@ -75,16 +75,17 @@ namespace ITWaves.UI
         
         private void HandleStart()
         {
-            // Start new game from level 1
-            PlayerPrefs.SetInt("StartLevel", 1);
+            // Start new game from wave 1 and reset save progress
+            SaveManager.ResetProgress();
+            PlayerPrefs.SetInt("StartWave", 1);
             SceneManager.LoadScene("Game");
         }
-        
+
         private void HandleContinue()
         {
-            // Continue from highest level reached
-            int highestLevel = SaveManager.GetHighestLevelReached();
-            PlayerPrefs.SetInt("StartLevel", highestLevel);
+            // Continue from highest wave reached
+            int highestWave = SaveManager.GetHighestWaveReached();
+            PlayerPrefs.SetInt("StartWave", highestWave);
             SceneManager.LoadScene("Game");
         }
         

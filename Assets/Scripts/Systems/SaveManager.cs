@@ -69,29 +69,49 @@ namespace ITWaves.Systems
             }
         }
         
-        public static int GetHighestLevelReached()
+        public static int GetHighestWaveReached()
         {
             if (cachedSaveData == null)
             {
                 cachedSaveData = Load();
             }
-            return cachedSaveData.highestLevelReached;
+            Debug.Log($"GetHighestWaveReached: returning {cachedSaveData.highestWaveReached}");
+            return cachedSaveData.highestWaveReached;
         }
-        
-        public static void UpdateHighestLevel(int level)
+
+        public static void UpdateHighestWave(int wave)
         {
             if (cachedSaveData == null)
             {
                 cachedSaveData = Load();
             }
-            
-            if (level > cachedSaveData.highestLevelReached)
+
+            Debug.Log($"UpdateHighestWave called: wave={wave}, current highest={cachedSaveData.highestWaveReached}");
+
+            if (wave > cachedSaveData.highestWaveReached)
             {
-                cachedSaveData.highestLevelReached = level;
+                cachedSaveData.highestWaveReached = wave;
                 Save(cachedSaveData);
+                Debug.Log($"Saved new highest wave: {wave}");
+            }
+            else
+            {
+                Debug.Log($"Wave {wave} not higher than current highest {cachedSaveData.highestWaveReached}, not saving");
             }
         }
-        
+
+        public static void ResetProgress()
+        {
+            if (cachedSaveData == null)
+            {
+                cachedSaveData = Load();
+            }
+
+            Debug.Log("Resetting progress to wave 1");
+            cachedSaveData.highestWaveReached = 1;
+            Save(cachedSaveData);
+        }
+
         public static void DeleteSave()
         {
             try
