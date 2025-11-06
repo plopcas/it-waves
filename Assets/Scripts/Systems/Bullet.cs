@@ -27,33 +27,10 @@ namespace ITWaves.Systems
             {
                 rb.gravityScale = 0f;
             }
-            else
-            {
-                Debug.LogError($"[Bullet] Failed to get Rigidbody2D component!");
-            }
-        }
-        
-        private void OnEnable()
-        {
+
             spawnTime = Time.time;
-            // Reset velocity when enabled from pool
-            if (rb != null)
-            {
-                rb.linearVelocity = Vector2.zero;
-                rb.angularVelocity = 0f;
-            }
         }
 
-        private void OnDisable()
-        {
-            // Reset velocity when disabled/returned to pool
-            if (rb != null)
-            {
-                rb.linearVelocity = Vector2.zero;
-                rb.angularVelocity = 0f;
-            }
-        }
-        
         private void Update()
         {
             // Auto-destroy after lifetime expires
@@ -65,26 +42,13 @@ namespace ITWaves.Systems
         
         public void Launch(Vector2 direction)
         {
-            // Ensure rb is initialized (in case Launch is called before Awake)
             if (rb == null)
             {
-                Debug.LogWarning($"[Bullet] rb was null in Launch, attempting to get component");
-                rb = GetComponent<Rigidbody2D>();
-                if (rb != null)
-                {
-                    rb.gravityScale = 0f;
-                }
-            }
-
-            if (rb == null)
-            {
-                Debug.LogError("[Bullet] Rigidbody2D is null! Cannot launch.");
                 return;
             }
 
             rb.linearVelocity = direction.normalized * speed;
 
-            // Rotate to face direction
             float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
             transform.rotation = Quaternion.Euler(0f, 0f, angle);
         }
@@ -145,4 +109,3 @@ namespace ITWaves.Systems
         }
     }
 }
-

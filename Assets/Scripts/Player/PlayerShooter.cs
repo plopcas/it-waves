@@ -115,18 +115,7 @@ namespace ITWaves.Player
                 nextFireTime = Time.time + (1f / fireRate);
             }
         }
-        
-        public void HandleFire(bool pressed)
-        {
-            if (!pressed || Time.time < nextFireTime)
-            {
-                return;
-            }
-            
-            Fire();
-            nextFireTime = Time.time + (1f / fireRate);
-        }
-        
+
         private void Fire()
         {
             // Don't shoot if player is dead
