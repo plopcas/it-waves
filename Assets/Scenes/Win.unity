@@ -929,7 +929,7 @@ MonoBehaviour:
   thankYouText: {fileID: 615855666}
   gameByText: {fileID: 1868435821}
   creditsCanvasGroup: {fileID: 1282634870}
-  statsDisplayTime: 3
+  statsDisplayTime: 5
   creditsPauseTime: 2.5
   scrollSpeed: 100
   fastScrollMultiplier: 3

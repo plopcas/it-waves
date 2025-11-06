@@ -212,22 +212,22 @@ namespace ITWaves.UI
                 Vector2 startPos = creditsScrollContainer.anchoredPosition;
                 float currentY = startPos.y;
 
-                // Show "THANK YOU FOR PLAYING" - pause first, then scroll
-                if (thankYouText != null)
-                {
-                    yield return new WaitForSeconds(GetPauseTime()); // Pause on first text
-                    float targetY = currentY + GetScrollDistanceToCenter(thankYouText.rectTransform);
-                    yield return StartCoroutine(ScrollToPosition(currentY, targetY));
-                    currentY = targetY;
-                }
-
-                // Show "A GAME BY PEDRO LOPEZ" - scroll to center then pause
+                // Show "A GAME BY PEDRO LOPEZ" - pause first, then scroll, then pause
                 if (gameByText != null)
                 {
+                    yield return new WaitForSeconds(GetPauseTime()); // Pause on first text
                     float targetY = currentY + GetScrollDistanceToCenter(gameByText.rectTransform);
                     yield return StartCoroutine(ScrollToPosition(currentY, targetY));
                     currentY = targetY;
-                    yield return new WaitForSeconds(GetPauseTime());
+                    yield return new WaitForSeconds(GetPauseTime()); // Pause after scroll
+                }
+
+                // Show "THANK YOU FOR PLAYING" - scroll to center then pause
+                if (thankYouText != null)
+                {
+                    float targetY = currentY + GetScrollDistanceToCenter(thankYouText.rectTransform);
+                    yield return StartCoroutine(ScrollToPosition(currentY, targetY));
+                    currentY = targetY;
                 }
             }
 
