@@ -19,6 +19,10 @@ namespace ITWaves.Systems
         [SerializeField, Tooltip("Music for gameplay (Game scene).")]
         private AudioClip gameplayMusic;
 
+        [Header("Victory Music")]
+        [SerializeField, Tooltip("Music for Win scene.")]
+        private AudioClip winMusic;
+
         [Header("Settings")]
         [SerializeField, Tooltip("Volume of the music (0-1).")]
         [Range(0f, 1f)]
@@ -127,12 +131,15 @@ namespace ITWaves.Systems
                 case "Boot":
                 case "MainMenu":
                 case "GameOver":
-                case "Win":
                     targetClip = menuMusic;
                     break;
 
                 case "Game":
                     targetClip = gameplayMusic;
+                    break;
+
+                case "Win":
+                    targetClip = winMusic;
                     break;
             }
 

@@ -24,6 +24,9 @@ namespace ITWaves.Player
         [Header("Audio")]
         [SerializeField, Tooltip("Shoot sound effect.")]
         private AudioClip shootSound;
+
+        [SerializeField, Range(0f, 1f), Tooltip("Volume of the shoot sound.")]
+        private float shootSoundVolume = 1f;
         
         private PlayerController controller;
         private PlayerHealth playerHealth;
@@ -163,7 +166,7 @@ namespace ITWaves.Player
             // Play sound
             if (audioSource != null && shootSound != null)
             {
-                audioSource.PlayOneShot(shootSound);
+                audioSource.PlayOneShot(shootSound, shootSoundVolume);
             }
         }
 

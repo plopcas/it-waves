@@ -115,6 +115,11 @@ namespace ITWaves.Systems
             cachedSaveData.collectedTreasures.Clear(); // Clear all collected treasures
             cachedSaveData.fireRateBoost = 0f; // Reset fire rate boost on new game
             cachedSaveData.snakePauseEnabled = false; // Reset snake pause ability
+            cachedSaveData.totalDeaths = 0; // Reset death counter
+            cachedSaveData.boxesDestroyed = 0; // Reset box counter
+            cachedSaveData.crawlersKilled = 0; // Reset crawler counter
+            cachedSaveData.skitterersKilled = 0; // Reset skitterer counter
+            cachedSaveData.totalPlaytimeSeconds = 0f; // Reset playtime
             Save(cachedSaveData);
         }
 
@@ -292,6 +297,107 @@ namespace ITWaves.Systems
             {
                 Debug.LogError($"Failed to delete save data: {e.Message}");
             }
+        }
+
+        // Game statistics methods
+        public static void IncrementDeaths()
+        {
+            if (cachedSaveData == null)
+            {
+                cachedSaveData = Load();
+            }
+
+            cachedSaveData.totalDeaths++;
+            Save(cachedSaveData);
+        }
+
+        public static void IncrementBoxesDestroyed()
+        {
+            if (cachedSaveData == null)
+            {
+                cachedSaveData = Load();
+            }
+
+            cachedSaveData.boxesDestroyed++;
+            Save(cachedSaveData);
+        }
+
+        public static void IncrementCrawlersKilled()
+        {
+            if (cachedSaveData == null)
+            {
+                cachedSaveData = Load();
+            }
+
+            cachedSaveData.crawlersKilled++;
+            Save(cachedSaveData);
+        }
+
+        public static void IncrementSkitterersKilled()
+        {
+            if (cachedSaveData == null)
+            {
+                cachedSaveData = Load();
+            }
+
+            cachedSaveData.skitterersKilled++;
+            Save(cachedSaveData);
+        }
+
+        public static int GetTotalDeaths()
+        {
+            if (cachedSaveData == null)
+            {
+                cachedSaveData = Load();
+            }
+            return cachedSaveData.totalDeaths;
+        }
+
+        public static int GetBoxesDestroyed()
+        {
+            if (cachedSaveData == null)
+            {
+                cachedSaveData = Load();
+            }
+            return cachedSaveData.boxesDestroyed;
+        }
+
+        public static int GetCrawlersKilled()
+        {
+            if (cachedSaveData == null)
+            {
+                cachedSaveData = Load();
+            }
+            return cachedSaveData.crawlersKilled;
+        }
+
+        public static int GetSkitterersKilled()
+        {
+            if (cachedSaveData == null)
+            {
+                cachedSaveData = Load();
+            }
+            return cachedSaveData.skitterersKilled;
+        }
+
+        public static void AddPlaytime(float seconds)
+        {
+            if (cachedSaveData == null)
+            {
+                cachedSaveData = Load();
+            }
+
+            cachedSaveData.totalPlaytimeSeconds += seconds;
+            Save(cachedSaveData);
+        }
+
+        public static float GetTotalPlaytime()
+        {
+            if (cachedSaveData == null)
+            {
+                cachedSaveData = Load();
+            }
+            return cachedSaveData.totalPlaytimeSeconds;
         }
     }
 }

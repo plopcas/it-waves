@@ -62,6 +62,16 @@ namespace ITWaves.Enemies
                 Core.GameManager.Instance.AddScore(scoreValue);
             }
 
+            // Increment kill counter based on enemy type
+            if (GetComponent<Crawler>() != null)
+            {
+                Systems.SaveManager.IncrementCrawlersKilled();
+            }
+            else if (GetComponent<Skitterer>() != null)
+            {
+                Systems.SaveManager.IncrementSkitterersKilled();
+            }
+
             // Destroy enemy
             Destroy(gameObject);
         }

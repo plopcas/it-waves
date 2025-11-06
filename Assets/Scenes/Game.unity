@@ -1286,6 +1286,10 @@ MonoBehaviour:
   enemySpawner: {fileID: 1422751853}
   snakeSpawner: {fileID: 1422751854}
   playerPrefab: {fileID: 7634828939623290413, guid: e26c72690ce5dac44a5db70c87b969bd, type: 3}
+  waveWinSound: {fileID: 8300000, guid: 8850e4ab16d2dfa4a82103f66abb5e24, type: 3}
+  waveWinVolume: 0.6
+  waveFailSound: {fileID: 8300000, guid: 5df0c80445158f54081638f6891bf347, type: 3}
+  waveFailVolume: 1
   isLevelActive: 0
   currentWave: 1
 --- !u!114 &1422751857

@@ -475,30 +475,30 @@ namespace ITWaves.Snake
             // Check if all segments are destroyed
             if (segments.Count == 0 && !isRetreating && !isMegaHead)
             {
-                // Check if we should activate mega head mode (wave 20)
-                var levelManager = ITWaves.LevelManager.Instance;
-                if (levelManager != null && levelManager.CurrentWave == 20)
-                {
-                    ActivateMegaHeadMode();
-                }
-                else
-                {
-                    // Normal retreat behavior
-                    isRetreating = true;
-                }
+                // Always start retreating when all segments are destroyed
+                // On wave 20, the snake will transform into mega head when it reaches the edge
+                isRetreating = true;
             }
         }
 
         private void OnSnakeEscaped()
         {
-            // Notify level manager that wave is complete
+            // Check if this is wave 20 - transform into mega head instead of escaping
+            var levelManager = ITWaves.LevelManager.Instance;
+            if (levelManager != null && levelManager.CurrentWave == 20)
+            {
+                // Transform into mega head at the edge
+                ActivateMegaHeadMode();
+                return;
+            }
+
+            // Normal wave completion - notify level manager
             if (Core.GameManager.Instance != null)
             {
                 Core.GameManager.Instance.AddScore(500); // Bonus for completing wave
             }
 
             // Notify level manager to start next wave
-            var levelManager = ITWaves.LevelManager.Instance;
             if (levelManager != null)
             {
                 levelManager.HandleSnakeEscaped();

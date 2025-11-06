@@ -102,6 +102,9 @@ namespace ITWaves.Props
                 Core.GameManager.Instance.AddScore(scoreValue);
             }
 
+            // Increment box destroyed counter
+            SaveManager.IncrementBoxesDestroyed();
+
             // Spawn debris
             if (debrisPrefab != null)
             {
@@ -109,7 +112,7 @@ namespace ITWaves.Props
                 {
                     Vector3 offset = Random.insideUnitCircle * 0.5f;
                     GameObject debris = Instantiate(debrisPrefab, transform.position + offset, Random.rotation);
-                    
+
                     // Add random velocity to debris
                     Rigidbody2D debrisRb = debris.GetComponent<Rigidbody2D>();
                     if (debrisRb != null)
@@ -117,12 +120,12 @@ namespace ITWaves.Props
                         debrisRb.linearVelocity = Random.insideUnitCircle * 3f;
                         debrisRb.angularVelocity = Random.Range(-360f, 360f);
                     }
-                    
+
                     // Auto-destroy debris after a delay
                     Destroy(debris, 2f);
                 }
             }
-            
+
             Destroy(gameObject);
         }
     }

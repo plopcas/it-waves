@@ -21,6 +21,13 @@ namespace ITWaves.Systems
         public float fireRateBoost = 0f; // Track accumulated fire rate boost from treasure boxes
         public bool snakePauseEnabled = false; // Track if player has snake pause ability (treasure 3)
 
+        // Game statistics (for current playthrough)
+        public int totalDeaths = 0; // Total times player died in current playthrough
+        public int boxesDestroyed = 0; // Total boxes destroyed in current playthrough
+        public int crawlersKilled = 0; // Total crawlers killed in current playthrough
+        public int skitterersKilled = 0; // Total skitterers killed in current playthrough
+        public float totalPlaytimeSeconds = 0f; // Total time spent in current playthrough (in seconds)
+
         public SaveData()
         {
             highestWaveReached = 1;
@@ -35,6 +42,11 @@ namespace ITWaves.Systems
             collectedTreasures = new List<int>();
             fireRateBoost = 0f;
             snakePauseEnabled = false;
+            totalDeaths = 0;
+            boxesDestroyed = 0;
+            crawlersKilled = 0;
+            skitterersKilled = 0;
+            totalPlaytimeSeconds = 0f;
         }
     }
 }

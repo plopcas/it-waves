@@ -144,5 +144,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: ITWaves.Runtime::ITWaves.Systems.MusicManager
   menuMusic: {fileID: 8300000, guid: 9e9d982453069b248a350de7b580ff41, type: 3}
   gameplayMusic: {fileID: 8300000, guid: 27c2de957be946745a00a08f425aaab2, type: 3}
+  winMusic: {fileID: 8300000, guid: a7f35e8af7af0d14fbbedb6420792300, type: 3}
   musicVolume: 0.5
   fadeDuration: 1
+  uiSoundVolume: 1

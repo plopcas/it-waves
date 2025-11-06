@@ -2,10 +2,8 @@ using UnityEngine;
 
 namespace ITWaves.UI
 {
-    /// <summary>
     /// Animates a snake sprite in the Boot scene - fades in and moves down towards center.
     /// Attach this to the Snake game object in the Boot scene.
-    /// </summary>
     public class BootSnakeAnimator : MonoBehaviour
     {
         [Header("Animation Settings")]

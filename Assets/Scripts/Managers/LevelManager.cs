@@ -32,6 +32,19 @@ namespace ITWaves
         [SerializeField, Tooltip("Player prefab.")]
         private GameObject playerPrefab;
 
+        [Header("Audio")]
+        [SerializeField, Tooltip("Sound played when wave is completed.")]
+        private AudioClip waveWinSound;
+
+        [SerializeField, Range(0f, 1f), Tooltip("Volume of the wave win sound.")]
+        private float waveWinVolume = 1f;
+
+        [SerializeField, Tooltip("Sound played when player dies.")]
+        private AudioClip waveFailSound;
+
+        [SerializeField, Range(0f, 1f), Tooltip("Volume of the wave fail sound.")]
+        private float waveFailVolume = 1f;
+
         [Header("State")]
         [SerializeField, Tooltip("Is game currently active.")]
         private bool isLevelActive;
@@ -42,6 +55,8 @@ namespace ITWaves
         private GameObject currentPlayer;
         private SnakeController currentSnake;
         private bool snakeHasEscaped = false; // Track if snake has completed retreat
+        private AudioSource audioSource;
+        private float waveStartTime; // Track when current wave started
 
         public bool IsLevelActive => isLevelActive;
         public int CurrentWave => currentWave;
@@ -59,6 +74,14 @@ namespace ITWaves
                 return;
             }
             Instance = this;
+
+            // Get or add AudioSource component
+            audioSource = GetComponent<AudioSource>();
+            if (audioSource == null)
+            {
+                audioSource = gameObject.AddComponent<AudioSource>();
+            }
+            audioSource.playOnAwake = false;
         }
 
         private void Start()
@@ -179,6 +202,16 @@ namespace ITWaves
             isLevelActive = false;
             snakeHasEscaped = true; // Mark that snake has escaped
 
+            // Add wave time to total playtime
+            float waveTime = Time.time - waveStartTime;
+            SaveManager.AddPlaytime(waveTime);
+
+            // Play wave win sound
+            if (audioSource != null && waveWinSound != null)
+            {
+                audioSource.PlayOneShot(waveWinSound, waveWinVolume);
+            }
+
             // Clear enemies
             if (enemySpawner != null)
             {
@@ -233,6 +266,13 @@ namespace ITWaves
             {
                 // Victory! Player defeated the mega head on wave 20
                 Debug.Log("Wave 20 mega head defeated - VICTORY!");
+
+                // Play wave win sound for final victory
+                if (audioSource != null && waveWinSound != null)
+                {
+                    audioSource.PlayOneShot(waveWinSound, waveWinVolume);
+                }
+
                 SaveManager.UpdateHighestWave(currentWave);
                 Invoke(nameof(LoadWinScene), 2f);
             }
@@ -246,6 +286,19 @@ namespace ITWaves
         public void HandlePlayerDied()
         {
             isLevelActive = false;
+
+            // Add wave time to total playtime (even on death)
+            float waveTime = Time.time - waveStartTime;
+            SaveManager.AddPlaytime(waveTime);
+
+            // Increment death counter
+            SaveManager.IncrementDeaths();
+
+            // Play wave fail sound
+            if (audioSource != null && waveFailSound != null)
+            {
+                audioSource.PlayOneShot(waveFailSound, waveFailVolume);
+            }
 
             // Stop spawning and clear enemies
             if (enemySpawner != null)
@@ -296,6 +349,9 @@ namespace ITWaves
         {
             isLevelActive = true;
             snakeHasEscaped = false; // Reset flag for new wave
+
+            // Track wave start time for playtime statistics
+            waveStartTime = Time.time;
 
             // Save current score at wave start (so we can restore it if player dies)
             if (Core.GameManager.Instance != null)

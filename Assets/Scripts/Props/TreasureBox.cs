@@ -64,10 +64,8 @@ namespace ITWaves.Props
             UpdateVisual();
         }
 
-        /// <summary>
         /// Set the treasure number for this treasure box.
         /// Called by the spawner when the treasure is created.
-        /// </summary>
         public void SetTreasureNumber(int number)
         {
             treasureNumber = number;
