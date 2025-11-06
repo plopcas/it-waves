@@ -55,6 +55,14 @@ namespace ITWaves.Level
             if (LevelManager.Instance != null)
             {
                 LevelManager.Instance.OnWaveStarted += HandleWaveStarted;
+
+                // Initialize fog based on current wave (when loading a saved game)
+                // This handles the case where the game starts at a wave > 1
+                int currentWave = LevelManager.Instance.CurrentWave;
+                if (currentWave >= 1)
+                {
+                    InitializeFogForWave(currentWave);
+                }
             }
         }
 
@@ -68,6 +76,20 @@ namespace ITWaves.Level
             if (LevelManager.Instance != null)
             {
                 LevelManager.Instance.OnWaveStarted -= HandleWaveStarted;
+            }
+        }
+
+        private void InitializeFogForWave(int waveNumber)
+        {
+            // Initialize fog without showing messages (used when loading saved game)
+            int fogDepth = GetFogDepthForWave(waveNumber);
+
+            if (fogDepth > 0)
+            {
+                currentFogDepth = fogDepth;
+                hasShownFirstFogMessage = true; // Don't show messages when loading
+                SpawnFog();
+                Debug.Log($"[FogManager] Initialized fog at depth {currentFogDepth} for wave {waveNumber}");
             }
         }
 
