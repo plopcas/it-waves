@@ -7,4 +7,5 @@
 [] Add a third tresure on level 15 that forces the snake pause movement for 2 clicks every 5 gunshots
 [] Add an indicator in the HUD, maybe bottom left, with the upgrades, simply UPGRADE: and then the yellow boxes.
 [] Complete the WIN screen with a final score and a button to return to main menu, and credits
+[] Add Pause menu on escape to go back to the main menu
 [] Refactor and remove things that are no longer needed, including redoing the README.md
