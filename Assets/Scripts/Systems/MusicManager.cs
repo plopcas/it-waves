@@ -32,9 +32,9 @@ namespace ITWaves.Systems
         private float fadeDuration = 1f;
 
         [Header("UI Sounds")]
-        [SerializeField, Tooltip("Volume for UI sound effects (0-1).")]
-        [Range(0f, 1f)]
-        private float uiSoundVolume = 1f;
+        [SerializeField, Tooltip("Base volume multiplier for UI sound effects (0-2). This is multiplied by the SFX volume setting.")]
+        [Range(0f, 2f)]
+        private float uiSoundVolumeMultiplier = 1.5f;
 
         private AudioSource audioSource;
         private AudioSource uiAudioSource; // Separate audio source for UI sounds
@@ -44,6 +44,7 @@ namespace ITWaves.Systems
         private float startVolume;
         private float targetVolume;
         private AudioClip nextClip;
+        private float uiSoundVolume = 1f; // Current SFX volume from settings
 
         private void Awake()
         {
@@ -67,7 +68,7 @@ namespace ITWaves.Systems
             uiAudioSource = gameObject.AddComponent<AudioSource>();
             uiAudioSource.loop = false;
             uiAudioSource.playOnAwake = false;
-            uiAudioSource.volume = uiSoundVolume;
+            uiAudioSource.volume = 1f; // Base volume, will be multiplied in PlayOneShot
 
             // Subscribe to scene changes
             SceneManager.sceneLoaded += OnSceneLoaded;
@@ -83,6 +84,15 @@ namespace ITWaves.Systems
 
         private void Start()
         {
+            // Load saved volume settings
+            float savedMusicVolume = SaveManager.GetMusicVolume();
+            float savedSFXVolume = SaveManager.GetSFXVolume();
+
+            SetVolume(savedMusicVolume);
+            SetUISoundVolume(savedSFXVolume);
+
+            Debug.Log($"[MusicManager] Loaded saved volumes - Music: {savedMusicVolume}, SFX: {savedSFXVolume}");
+
             // Start playing appropriate music for the current scene
             PlayMusicForScene(SceneManager.GetActiveScene().name);
         }
@@ -212,21 +222,19 @@ namespace ITWaves.Systems
         {
             if (uiAudioSource != null && clip != null)
             {
-                uiAudioSource.PlayOneShot(clip, uiSoundVolume);
+                // Apply both the base multiplier and the user's SFX volume setting
+                float finalVolume = uiSoundVolumeMultiplier * uiSoundVolume;
+                uiAudioSource.PlayOneShot(clip, finalVolume);
             }
         }
 
-        // Set UI sound volume.
+        // Set UI sound volume (from user settings).
         public void SetUISoundVolume(float volume)
         {
             uiSoundVolume = Mathf.Clamp01(volume);
-            if (uiAudioSource != null)
-            {
-                uiAudioSource.volume = uiSoundVolume;
-            }
         }
 
-        // Get current UI sound volume.
+        // Get current UI sound volume (from user settings).
         public float GetUISoundVolume()
         {
             return uiSoundVolume;

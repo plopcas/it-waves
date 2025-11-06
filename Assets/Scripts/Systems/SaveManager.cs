@@ -399,6 +399,45 @@ namespace ITWaves.Systems
             }
             return cachedSaveData.totalPlaytimeSeconds;
         }
+
+        public static float GetMusicVolume()
+        {
+            if (cachedSaveData == null)
+            {
+                cachedSaveData = Load();
+            }
+            return cachedSaveData.musicVolume;
+        }
+
+        public static void SetMusicVolume(float volume)
+        {
+            if (cachedSaveData == null)
+            {
+                cachedSaveData = Load();
+            }
+
+            cachedSaveData.musicVolume = Mathf.Clamp01(volume);
+            Save(cachedSaveData);
+        }
+
+        public static float GetSFXVolume()
+        {
+            if (cachedSaveData == null)
+            {
+                cachedSaveData = Load();
+            }
+            return cachedSaveData.sfxVolume;
+        }
+
+        public static void SetSFXVolume(float volume)
+        {
+            if (cachedSaveData == null)
+            {
+                cachedSaveData = Load();
+            }
+
+            cachedSaveData.sfxVolume = Mathf.Clamp01(volume);
+            Save(cachedSaveData);
+        }
     }
 }
-

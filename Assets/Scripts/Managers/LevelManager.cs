@@ -209,7 +209,8 @@ namespace ITWaves
             // Play wave win sound
             if (audioSource != null && waveWinSound != null)
             {
-                audioSource.PlayOneShot(waveWinSound, waveWinVolume);
+                float sfxVolume = Systems.SaveManager.GetSFXVolume();
+                audioSource.PlayOneShot(waveWinSound, waveWinVolume * sfxVolume);
             }
 
             // Clear enemies
@@ -270,7 +271,8 @@ namespace ITWaves
                 // Play wave win sound for final victory
                 if (audioSource != null && waveWinSound != null)
                 {
-                    audioSource.PlayOneShot(waveWinSound, waveWinVolume);
+                    float sfxVolume = Systems.SaveManager.GetSFXVolume();
+                    audioSource.PlayOneShot(waveWinSound, waveWinVolume * sfxVolume);
                 }
 
                 SaveManager.UpdateHighestWave(currentWave);
@@ -297,7 +299,8 @@ namespace ITWaves
             // Play wave fail sound
             if (audioSource != null && waveFailSound != null)
             {
-                audioSource.PlayOneShot(waveFailSound, waveFailVolume);
+                float sfxVolume = Systems.SaveManager.GetSFXVolume();
+                audioSource.PlayOneShot(waveFailSound, waveFailVolume * sfxVolume);
             }
 
             // Stop spawning and clear enemies

@@ -49,6 +49,13 @@ namespace ITWaves.UI
         [SerializeField, Tooltip("Narrative text.")]
         private TextMeshProUGUI narrativeText;
 
+        [Header("Options Sliders")]
+        [SerializeField, Tooltip("Music volume slider.")]
+        private Slider musicVolumeSlider;
+
+        [SerializeField, Tooltip("SFX volume slider.")]
+        private Slider sfxVolumeSlider;
+
         [Header("Audio")]
         [SerializeField, Tooltip("Sound to play when clicking menu buttons.")]
         private AudioClip menuClickSound;
@@ -113,6 +120,23 @@ namespace ITWaves.UI
             if (confirmationPanel != null)
             {
                 confirmationPanel.SetActive(false);
+            }
+
+            // Setup volume sliders
+            if (musicVolumeSlider != null)
+            {
+                musicVolumeSlider.minValue = 0f;
+                musicVolumeSlider.maxValue = 1f;
+                musicVolumeSlider.value = SaveManager.GetMusicVolume();
+                musicVolumeSlider.onValueChanged.AddListener(HandleMusicVolumeChanged);
+            }
+
+            if (sfxVolumeSlider != null)
+            {
+                sfxVolumeSlider.minValue = 0f;
+                sfxVolumeSlider.maxValue = 1f;
+                sfxVolumeSlider.value = SaveManager.GetSFXVolume();
+                sfxVolumeSlider.onValueChanged.AddListener(HandleSFXVolumeChanged);
             }
 
             // Show main menu
@@ -193,6 +217,24 @@ namespace ITWaves.UI
             {
                 confirmationPanel.SetActive(false);
             }
+
+            // Initialize slider values from saved settings
+            InitializeVolumeSliders();
+        }
+
+        private void InitializeVolumeSliders()
+        {
+            if (musicVolumeSlider != null)
+            {
+                float savedMusicVolume = SaveManager.GetMusicVolume();
+                musicVolumeSlider.SetValueWithoutNotify(savedMusicVolume);
+            }
+
+            if (sfxVolumeSlider != null)
+            {
+                float savedSFXVolume = SaveManager.GetSFXVolume();
+                sfxVolumeSlider.SetValueWithoutNotify(savedSFXVolume);
+            }
         }
 
         public void HandleBackToMenu()
@@ -272,6 +314,32 @@ namespace ITWaves.UI
             // Just hide the confirmation dialog
             HideConfirmationDialog();
         }
+
+        private void HandleMusicVolumeChanged(float value)
+        {
+            // Save the new volume
+            SaveManager.SetMusicVolume(value);
+
+            // Apply to MusicManager immediately
+            if (MusicManager.Instance != null)
+            {
+                MusicManager.Instance.SetVolume(value);
+            }
+        }
+
+        private void HandleSFXVolumeChanged(float value)
+        {
+            // Save the new volume
+            SaveManager.SetSFXVolume(value);
+
+            // Apply to MusicManager immediately (for UI sounds)
+            if (MusicManager.Instance != null)
+            {
+                MusicManager.Instance.SetUISoundVolume(value);
+            }
+
+            // Play a test sound so user can hear the change
+            PlayMenuSound();
+        }
     }
 }
-

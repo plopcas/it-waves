@@ -155,7 +155,8 @@ namespace ITWaves.Player
             // Play sound
             if (audioSource != null && shootSound != null)
             {
-                audioSource.PlayOneShot(shootSound, shootSoundVolume);
+                float sfxVolume = SaveManager.GetSFXVolume();
+                audioSource.PlayOneShot(shootSound, shootSoundVolume * sfxVolume);
             }
         }
 

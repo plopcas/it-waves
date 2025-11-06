@@ -126,7 +126,7 @@ MonoBehaviour:
   bulletSpawnOffset: 0.5
   bulletPrefab: {fileID: 4827074559829497637, guid: e56ddb584becd964185e19e84d0e055c, type: 3}
   shootSound: {fileID: 8300000, guid: 3323ffc362eea5b469528a36d0348644, type: 3}
-  shootSoundVolume: 0.8
+  shootSoundVolume: 0.6
   hitsPerPause: 5
   pauseClickCount: 4
   stunCooldownClicks: 4

@@ -177,6 +177,7 @@ namespace ITWaves.Props
                 GameObject tempAudio = new GameObject("TreasureCollectSound");
                 AudioSource audioSource = tempAudio.AddComponent<AudioSource>();
                 audioSource.clip = collectSound;
+                audioSource.volume = Systems.SaveManager.GetSFXVolume();
                 audioSource.Play();
                 Destroy(tempAudio, collectSound.length);
                 Debug.Log($"[TreasureBox] Playing collect sound: {collectSound.name}");
