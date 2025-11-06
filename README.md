@@ -1,144 +1,43 @@
-# IT-Waves: Horror Snake Game
+# IT-Waves
 
-## Project Structure
-
-```
-Assets/
-  ├── Audio/              # Sound effects and music
-  ├── Materials/          # URP 2D materials
-  ├── Prefabs/            # Reusable game objects
-  ├── Scenes/             # Game scenes (Boot, MainMenu, Game, Win, GameOver)
-  ├── Scripts/
-  │   ├── Core/           # Core systems and utilities (GameLoader, GameManager)
-  │   ├── Player/         # Player controller, shooting, health, dash
-  │   ├── Snake/          # Main antagonist with wave motion
-  │   ├── Enemies/        # Additional enemy types (Crawler, Skitterer)
-  │   ├── Props/          # Destructible boxes and obstacles
-  │   ├── Level/          # Level management, difficulty, procedural generation
-  │   ├── Systems/        # Combat, pooling, save/load
-  │   ├── UI/             # HUD, menus, screens
-  │   ├── Managers/       # Existing managers (LevelManager)
-  │   └── Editor/         # Editor tools
-  ├── Settings/           # ScriptableObject assets (LevelConfig, DifficultyProfile, SnakeConfig)
-  ├── Lighting/           # URP 2D lighting presets
-  └── Fonts/              # TextMeshPro fonts
-```
+A retro horror game where you hunt a single snake-like monstrosity across 20 procedurally generated waves. The snake escapes when damaged enough (waves 1-19), forcing you to chase it through increasingly difficult arenas. On Wave 20, you finally defeat it.
 
 ## Game Overview
 
-A retro horror game where you hunt a single snake-like monstrosity across 20 procedurally generated levels. The snake escapes when damaged enough (levels 1-19), forcing you to chase it through increasingly difficult arenas. On Level 20, you finally defeat it.
+**IT-Waves** is a top-down arcade horror shooter inspired by classic games like Centipede. You're frozen in fear at the center of the screen, able only to aim and shoot as a sinister snake and its minions close in. Each wave increases the difficulty—more enemies, closing fog, and a relentless snake that won't stop until Wave 20.
+
+### Core Gameplay
+- **20 Waves**: Progress through increasingly difficult waves
+- **Snake Boss**: A segmented snake that moves in wave patterns across a grid
+- **Wave Completion**: Damage the snake enough and it escapes, starting the next wave with one additional segment
+- **Final Battle**: Wave 20 transforms the snake into a mega head boss—defeat it to win
+- **Instant Death**: Any contact with enemies or the snake kills you instantly
+- **Score System**: Earn points by destroying enemies and boxes; score is saved only when you complete a wave
+
+### Enemies
+- **Snake**: The main antagonist with grid-based wave movement, growing longer each wave
+- **Crawler**: Moves in bursts (slow/fast) with diagonal or lateral patterns, avoiding obstacles
+- **Skitterer**: Constant medium-speed movement with zig-zag patterns toward the player
+
+### Power-Ups
+Hidden **Treasure Boxes** spawn throughout the game.
+
+### Environmental Hazards
+- **Destructible Boxes**: Spawn when the snake is hit; block movement and can be destroyed for points
+- **Closing Fog**: Progressively shrinks the playable area.
 
 ## Controls
 
-**The player is stationary at the center of the screen, frozen in fear. You can only aim and shoot.**
-
 ### Keyboard & Mouse
 - **Aim**: Mouse
-- **Fire**: Left Mouse Button
+- **Fire**: Left Mouse Button (hold for automatic fire)
 - **Pause**: Escape
 
-### Gamepad
-- **Aim**: Right Stick
-- **Fire**: RT
-- **Pause**: Start
+## License
 
-## Core Systems
+See [LICENSE](LICENSE) file for details. The code is open source for viewing, but all rights to use, modify, distribute, or monetize the game are reserved.
 
-### Level Progression
-- 20 levels total
-- Difficulty scales via `LevelDifficultyProfile` curves
-- Procedural arena generation with destructible boxes
-- Snake escapes at low health (levels 1-19)
-- Final defeat on Level 20 triggers victory
+---
 
-### Snake Mechanics
-- Wave/sinusoidal movement pattern
-- Segments follow head in chain
-- Shared health pool across segments
-- Spawns boxes when hit (Centipede homage)
-- Behaviours: Patrol, Chase, Enrage, Escape
-
-### Player Systems
-- Top-down omnidirectional movement
-- Aim-based shooting
-- Dash with invulnerability frames
-- Health with i-frames on hit
-
-### Additional Enemies
-- **Crawler**: Burst movement, leaves slow puddles
-- **Skitterer**: Zig-zag wander, periodic charges
-
-## Swapping Placeholder Art
-
-All placeholder art uses Unity 2D shapes (Capsules, Circles, Squares). To replace with final sprites:
-
-1. **Import sprites** into `ArtPlaceholders/` with appropriate import settings:
-   - Texture Type: Sprite (2D and UI)
-   - Pixels Per Unit: 16 (or your chosen PPU)
-   - Filter Mode: Point (no filter) for crisp pixels
-   - Compression: None
-
-2. **Update prefabs**:
-   - Open prefab in Prefab Mode
-   - Replace SpriteRenderer sprite reference
-   - Adjust collider sizes if needed
-   - Update sorting layer if required
-
-3. **Lighting**: 2D lights are already configured. Add normal maps to sprites for enhanced lighting effects.
-
-## Build Settings
-
-- **Platform**: WebGL (primary target)
-- **Scenes**: Boot → MainMenu → Game → Win/GameOver
-- **URP**: 2D Renderer with global dim lighting
-- **Physics2D**: Zero gravity (top-down)
-
-## Assembly Definitions
-
-- **ITWaves.Runtime**: Main game code
-- **ITWaves.Editor**: Editor-only tools
-
-## Tags & Layers
-
-### Tags
-- Player
-- Snake
-- Enemy
-- Box
-- Bullet
-
-### Layers
-- Player
-- Enemy
-- Snake
-- Props
-- Projectiles
-- FX
-- UI
-- Default
-
-### Sorting Layers (back to front)
-- Background
-- Props
-- Enemies
-- Snake
-- Player
-- FX
-- UI
-
-## Save System
-
-Saves to `Application.persistentDataPath` with JSON + HMAC integrity check:
-- Highest level reached (for Continue)
-- Volume settings
-- Basic options
-
-## Development Notes
-
-- Unity 6, .NET Standard 2.1
-- New Input System (PlayerInput component)
-- URP 2D with 2D Lights
-- Deterministic procedural generation using seeded System.Random
-- Object pooling for bullets, enemies, FX
-- Event-driven architecture for state transitions
+**IT-Waves** © 2025 Pedro Lopez. All rights reserved.
 
