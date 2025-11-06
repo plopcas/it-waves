@@ -26,23 +26,29 @@ namespace ITWaves.Player
         private AudioClip shootSound;
         
         private PlayerController controller;
+        private PlayerHealth playerHealth;
         private AudioSource audioSource;
         private float nextFireTime;
         private bool isFiring;
         private bool hasFiredThisPress;
 
         [Header("Snake Pause (Treasure 3)")]
-        [SerializeField, Tooltip("Number of shots before triggering snake pause.")]
-        private int shotsPerPause = 5;
+        [SerializeField, Tooltip("Number of hits before triggering snake pause.")]
+        private int hitsPerPause = 5;
 
         [SerializeField, Tooltip("Number of clicks/moves to pause snake for.")]
-        private int pauseClickCount = 2;
+        private int pauseClickCount = 4;
 
-        private int shotsSincePause = 0; // Track shots since last pause
+        [SerializeField, Tooltip("Cooldown clicks after stunning before can stun again.")]
+        private int stunCooldownClicks = 4;
+
+        private int hitsSincePause = 0; // Track hits since last pause
+        private int cooldownClicksRemaining = 0; // Track cooldown after stun
         
         private void Awake()
         {
             controller = GetComponent<PlayerController>();
+            playerHealth = GetComponent<PlayerHealth>();
             audioSource = GetComponent<AudioSource>();
             fireRate = baseFireRate; // Initialize current fire rate
 
@@ -57,6 +63,12 @@ namespace ITWaves.Player
         
         public void OnAttack(InputValue value)
         {
+            // Don't shoot if player is dead
+            if (playerHealth != null && !playerHealth.IsAlive)
+            {
+                return;
+            }
+
             // Check if button was just pressed
             if (value.isPressed)
             {
@@ -74,6 +86,14 @@ namespace ITWaves.Player
 
         private void Update()
         {
+            // Don't shoot if player is dead
+            if (playerHealth != null && !playerHealth.IsAlive)
+            {
+                isFiring = false;
+                hasFiredThisPress = false;
+                return;
+            }
+
             // Check if mouse button is still held using the new Input System
             bool isMouseButtonHeld = UnityEngine.InputSystem.Mouse.current != null &&
                                      UnityEngine.InputSystem.Mouse.current.leftButton.isPressed;
@@ -106,6 +126,12 @@ namespace ITWaves.Player
         
         private void Fire()
         {
+            // Don't shoot if player is dead
+            if (playerHealth != null && !playerHealth.IsAlive)
+            {
+                return;
+            }
+
             if (bulletPrefab == null)
             {
                 Debug.LogWarning("No bullet prefab assigned!");
@@ -139,18 +165,32 @@ namespace ITWaves.Player
             {
                 audioSource.PlayOneShot(shootSound);
             }
+        }
 
-            // Check if snake pause ability is enabled (treasure 3)
-            if (SaveManager.IsSnakePauseEnabled())
+        // Called by Bullet when it hits the snake (only if stun gun is enabled)
+        public void OnSnakeHit()
+        {
+            if (!SaveManager.IsSnakePauseEnabled())
             {
-                shotsSincePause++;
+                return;
+            }
 
-                // Every 5 shots, pause the snake
-                if (shotsSincePause >= shotsPerPause)
-                {
-                    shotsSincePause = 0;
-                    TriggerSnakePause();
-                }
+            // Decrement cooldown if active
+            if (cooldownClicksRemaining > 0)
+            {
+                cooldownClicksRemaining--;
+                Debug.Log($"[PlayerShooter] Stun cooldown: {cooldownClicksRemaining} clicks remaining");
+                return; // Don't count hits during cooldown
+            }
+
+            hitsSincePause++;
+
+            // Every 5 hits, pause the snake
+            if (hitsSincePause >= hitsPerPause)
+            {
+                hitsSincePause = 0;
+                cooldownClicksRemaining = stunCooldownClicks; // Start cooldown
+                TriggerSnakePause();
             }
         }
 
@@ -161,7 +201,7 @@ namespace ITWaves.Player
             if (snake != null)
             {
                 snake.PauseForClicks(pauseClickCount);
-                Debug.Log($"[PlayerShooter] Snake paused for {pauseClickCount} clicks!");
+                Debug.Log($"[PlayerShooter] Snake paused for {pauseClickCount} clicks! Cooldown: {stunCooldownClicks} clicks");
             }
             else
             {

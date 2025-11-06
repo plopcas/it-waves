@@ -97,11 +97,37 @@ namespace ITWaves.Systems
                 return;
             }
 
+            // Check if we hit the snake (for stun gun tracking)
+            var snakeController = other.GetComponent<Snake.SnakeController>();
+            var snakeSegment = other.GetComponent<Snake.SnakeSegment>();
+            bool hitSnake = snakeController != null || snakeSegment != null;
+
             // Try to damage
             var damageable = other.GetComponent<IDamageable>();
             if (damageable != null)
             {
                 damageable.ApplyDamage(damage, gameObject);
+
+                // Notify player shooter if we hit the snake (for stun gun)
+                // But NOT if it's the mega head (mega head cannot be stunned)
+                if (hitSnake)
+                {
+                    bool isMegaHead = snakeController != null && snakeController.IsMegaHead;
+
+                    if (!isMegaHead)
+                    {
+                        var player = GameObject.FindGameObjectWithTag("Player");
+                        if (player != null)
+                        {
+                            var shooter = player.GetComponent<Player.PlayerShooter>();
+                            if (shooter != null)
+                            {
+                                shooter.OnSnakeHit();
+                            }
+                        }
+                    }
+                }
+
                 ReturnToPool();
                 return;
             }

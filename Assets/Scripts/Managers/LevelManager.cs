@@ -41,6 +41,7 @@ namespace ITWaves
 
         private GameObject currentPlayer;
         private SnakeController currentSnake;
+        private bool snakeHasEscaped = false; // Track if snake has completed retreat
 
         public bool IsLevelActive => isLevelActive;
         public int CurrentWave => currentWave;
@@ -176,6 +177,7 @@ namespace ITWaves
         public void HandleSnakeEscaped()
         {
             isLevelActive = false;
+            snakeHasEscaped = true; // Mark that snake has escaped
 
             // Clear enemies
             if (enemySpawner != null)
@@ -226,10 +228,11 @@ namespace ITWaves
                 layoutGenerator.ClearLayout();
             }
 
-            // Check if player has reached a high wave milestone (e.g., wave 20)
-            if (currentWave >= 20)
+            // Check if player has reached wave 20 (final wave with mega head boss)
+            if (currentWave == 20)
             {
-                // Victory!
+                // Victory! Player defeated the mega head on wave 20
+                Debug.Log("Wave 20 mega head defeated - VICTORY!");
                 SaveManager.UpdateHighestWave(currentWave);
                 Invoke(nameof(LoadWinScene), 2f);
             }
@@ -257,8 +260,22 @@ namespace ITWaves
                 layoutGenerator.ClearLayout();
             }
 
+            // Check if snake has escaped - if not, player died during retreat
+            // In this case, we should NOT increment the wave (restart same wave)
+            if (snakeHasEscaped)
+            {
+                // Snake escaped, so wave was completed - player died after wave completion
+                // This shouldn't normally happen, but if it does, treat as normal death
+                Debug.Log($"Player died on wave {currentWave} after snake escaped");
+            }
+            else
+            {
+                // Snake hasn't escaped yet - player died during the wave
+                // Don't increment wave, restart same wave
+                Debug.Log($"Player died on wave {currentWave} before snake escaped - will restart same wave");
+            }
+
             // Save progress - player reached this wave (even though they died on it)
-            Debug.Log($"Player died on wave {currentWave}, saving as highest wave reached");
             SaveManager.UpdateHighestWave(currentWave);
 
             // Save death score for GameOver display (but continue score is already saved from wave start)
@@ -278,6 +295,7 @@ namespace ITWaves
         private void RestartWave()
         {
             isLevelActive = true;
+            snakeHasEscaped = false; // Reset flag for new wave
 
             // Save current score at wave start (so we can restore it if player dies)
             if (Core.GameManager.Instance != null)

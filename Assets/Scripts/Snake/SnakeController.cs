@@ -36,10 +36,15 @@ namespace ITWaves.Snake
         private bool isRetreating = false;
         private bool isVisible = false; // Track if snake has been spawned yet
         private int pauseClicksRemaining = 0; // Number of clicks/moves to pause for
+        private bool isMegaHead = false; // Wave 20 mega head mode
+        private Vector3 originalScale; // Store original scale for mega head transformation
+        private int megaHeadHealth = 5; // Mega head requires 5 hits to defeat
+        private const int MAX_MEGA_HEAD_HEALTH = 5;
 
-        public bool IsAlive => segments.Count > 0 || gameObject != null;
+        public bool IsAlive => segments.Count > 0 || isMegaHead || gameObject != null;
         public int SegmentCount => segments.Count;
         public bool IsVisible => isVisible;
+        public bool IsMegaHead => isMegaHead;
 
         public IReadOnlyList<Vector2> GetOccupiedCells()
         {
@@ -73,6 +78,9 @@ namespace ITWaves.Snake
             rb = GetComponent<Rigidbody2D>();
             rb.gravityScale = 0f;
             rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+
+            // Store original scale
+            originalScale = transform.localScale;
 
             if (GridManager.Instance != null)
             {
@@ -194,6 +202,13 @@ namespace ITWaves.Snake
         
         public void PauseForClicks(int clickCount)
         {
+            // Mega head cannot be stunned/paused
+            if (isMegaHead)
+            {
+                Debug.Log("[SnakeController] Mega head cannot be stunned!");
+                return;
+            }
+
             pauseClicksRemaining = clickCount;
             Debug.Log($"[SnakeController] Snake paused for {clickCount} clicks");
         }
@@ -208,6 +223,13 @@ namespace ITWaves.Snake
                 pauseClicksRemaining--;
                 Debug.Log($"[SnakeController] Snake paused, {pauseClicksRemaining} clicks remaining");
                 return; // Skip this step
+            }
+
+            // If in mega head mode, use special movement
+            if (isMegaHead)
+            {
+                TakeMegaHeadStep();
+                return;
             }
 
             // If retreating, walk back the path
@@ -414,6 +436,27 @@ namespace ITWaves.Snake
                 return;
             }
 
+            // If in mega head mode, reduce health
+            if (isMegaHead)
+            {
+                megaHeadHealth--;
+                Debug.Log($"[SnakeController] Mega head hit! Health remaining: {megaHeadHealth}/{MAX_MEGA_HEAD_HEALTH}");
+
+                // Flash effect
+                var hitFlash = GetComponent<HitFlash>();
+                if (hitFlash != null)
+                {
+                    hitFlash.Flash();
+                }
+
+                // Check if mega head is defeated
+                if (megaHeadHealth <= 0)
+                {
+                    OnMegaHeadDefeated();
+                }
+                return;
+            }
+
             // Don't spawn boxes when hit - only when destroyed
             // (This fixes the random box spawning issue)
 
@@ -429,10 +472,20 @@ namespace ITWaves.Snake
                 }
             }
 
-            // Check if all segments are destroyed - start retreat
-            if (segments.Count == 0 && !isRetreating)
+            // Check if all segments are destroyed
+            if (segments.Count == 0 && !isRetreating && !isMegaHead)
             {
-                isRetreating = true;
+                // Check if we should activate mega head mode (wave 20)
+                var levelManager = ITWaves.LevelManager.Instance;
+                if (levelManager != null && levelManager.CurrentWave == 20)
+                {
+                    ActivateMegaHeadMode();
+                }
+                else
+                {
+                    // Normal retreat behavior
+                    isRetreating = true;
+                }
             }
         }
 
@@ -449,6 +502,108 @@ namespace ITWaves.Snake
             if (levelManager != null)
             {
                 levelManager.HandleSnakeEscaped();
+            }
+
+            // Destroy the snake
+            Destroy(gameObject);
+        }
+
+        private void TakeMegaHeadStep()
+        {
+            if (GridManager.Instance == null || player == null) return;
+
+            float cellSize = GridManager.Instance.CellSize;
+
+            // Calculate direction to player
+            Vector2 toPlayer = (Vector2)player.position - currentGridPos;
+            Vector2 moveDirection = Vector2.zero;
+
+            // Move in the dominant direction (larger component)
+            if (Mathf.Abs(toPlayer.x) > Mathf.Abs(toPlayer.y))
+            {
+                // Move horizontally
+                moveDirection = toPlayer.x > 0 ? Vector2.right : Vector2.left;
+            }
+            else
+            {
+                // Move vertically
+                moveDirection = toPlayer.y > 0 ? Vector2.up : Vector2.down;
+            }
+
+            // Calculate next position
+            Vector2 nextPos = currentGridPos + moveDirection * cellSize;
+
+            // Check for boxes and destroy them
+            DestroyBoxesAtPosition(nextPos);
+
+            // Move to next position
+            currentGridPos = nextPos;
+            currentGridPos = GridManager.Instance.SnapToGrid(currentGridPos);
+
+            // Update direction for rotation
+            horizontalDirection = moveDirection;
+
+            // Check if mega head reached the player
+            StartCoroutine(CheckPlayerProximityNextFrame());
+        }
+
+        private void DestroyBoxesAtPosition(Vector2 position)
+        {
+            if (GridManager.Instance == null) return;
+
+            // Check for boxes at this position
+            float checkRadius = GridManager.Instance.CellSize * 0.6f;
+            Collider2D[] hits = Physics2D.OverlapCircleAll(position, checkRadius);
+
+            foreach (Collider2D hit in hits)
+            {
+                // Destroy boxes in the way
+                if (hit.CompareTag("Box") || hit.gameObject.layer == LayerMask.NameToLayer("Props"))
+                {
+                    var damageable = hit.GetComponent<IDamageable>();
+                    if (damageable != null)
+                    {
+                        // Instantly destroy the box
+                        damageable.ApplyDamage(999f, gameObject);
+                    }
+                }
+            }
+        }
+
+        private void ActivateMegaHeadMode()
+        {
+            Debug.Log("[SnakeController] Activating Mega Head Mode!");
+            isMegaHead = true;
+            isRetreating = false;
+
+            // Reset mega head health
+            megaHeadHealth = MAX_MEGA_HEAD_HEALTH;
+
+            // Scale up to 2x size
+            transform.localScale = originalScale * 2f;
+
+            // Increase speed
+            stepsPerSecond *= 1.5f;
+
+            // Clear path history (no longer retreating)
+            pathHistory.Clear();
+        }
+
+        private void OnMegaHeadDefeated()
+        {
+            Debug.Log("[SnakeController] Mega Head defeated!");
+
+            // Award bonus score
+            if (Core.GameManager.Instance != null)
+            {
+                Core.GameManager.Instance.AddScore(1000); // Big bonus for defeating mega head
+            }
+
+            // Notify level manager that snake is defeated (triggers win)
+            var levelManager = ITWaves.LevelManager.Instance;
+            if (levelManager != null)
+            {
+                levelManager.HandleSnakeDefeated();
             }
 
             // Destroy the snake
