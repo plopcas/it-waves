@@ -1438,6 +1438,7 @@ MonoBehaviour:
   quitButton: {fileID: 217731690}
   waveText: {fileID: 1336187436}
   scoreText: {fileID: 294908772}
+  menuClickSound: {fileID: 8300000, guid: b0f18b9bc7bf2904f837f1837fdbb643, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

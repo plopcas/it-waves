@@ -27,7 +27,13 @@ namespace ITWaves.Systems
         [SerializeField, Tooltip("Fade duration when transitioning between tracks (seconds).")]
         private float fadeDuration = 1f;
 
+        [Header("UI Sounds")]
+        [SerializeField, Tooltip("Volume for UI sound effects (0-1).")]
+        [Range(0f, 1f)]
+        private float uiSoundVolume = 1f;
+
         private AudioSource audioSource;
+        private AudioSource uiAudioSource; // Separate audio source for UI sounds
         private AudioClip currentClip;
         private bool isFading;
         private float fadeTimer;
@@ -47,11 +53,17 @@ namespace ITWaves.Systems
             instance = this;
             DontDestroyOnLoad(gameObject);
 
-            // Get or add AudioSource
+            // Get or add AudioSource for music
             audioSource = GetComponent<AudioSource>();
             audioSource.loop = true;
             audioSource.playOnAwake = false;
             audioSource.volume = musicVolume;
+
+            // Create a second AudioSource for UI sounds
+            uiAudioSource = gameObject.AddComponent<AudioSource>();
+            uiAudioSource.loop = false;
+            uiAudioSource.playOnAwake = false;
+            uiAudioSource.volume = uiSoundVolume;
 
             // Subscribe to scene changes
             SceneManager.sceneLoaded += OnSceneLoaded;
@@ -186,6 +198,31 @@ namespace ITWaves.Systems
         public float GetVolume()
         {
             return musicVolume;
+        }
+
+        // Play a UI sound effect (survives scene transitions).
+        public void PlayUISound(AudioClip clip)
+        {
+            if (uiAudioSource != null && clip != null)
+            {
+                uiAudioSource.PlayOneShot(clip, uiSoundVolume);
+            }
+        }
+
+        // Set UI sound volume.
+        public void SetUISoundVolume(float volume)
+        {
+            uiSoundVolume = Mathf.Clamp01(volume);
+            if (uiAudioSource != null)
+            {
+                uiAudioSource.volume = uiSoundVolume;
+            }
+        }
+
+        // Get current UI sound volume.
+        public float GetUISoundVolume()
+        {
+            return uiSoundVolume;
         }
 
         private void StartFade(float from, float to)

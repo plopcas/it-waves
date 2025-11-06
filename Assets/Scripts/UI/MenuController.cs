@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using TMPro;
+using System.Collections;
 using ITWaves.Systems;
 
 namespace ITWaves.UI
@@ -47,6 +48,13 @@ namespace ITWaves.UI
         [Header("Narrative")]
         [SerializeField, Tooltip("Narrative text.")]
         private TextMeshProUGUI narrativeText;
+
+        [Header("Audio")]
+        [SerializeField, Tooltip("Sound to play when clicking menu buttons.")]
+        private AudioClip menuClickSound;
+
+        [SerializeField, Tooltip("Delay before quitting to allow sound to play (seconds).")]
+        private float quitDelay = 0.2f;
 
         private const string NARRATIVE_TEXT = "LOST IN A HOUSE THAT HATES THE LIGHT, YOU HUNT WHAT HUNTS YOU.";
 
@@ -113,6 +121,7 @@ namespace ITWaves.UI
         
         private void HandleStart()
         {
+            PlayMenuSound();
             // Start new game from wave 1 and reset save progress
             SaveManager.ResetProgress();
             SceneManager.LoadScene("Game");
@@ -120,17 +129,34 @@ namespace ITWaves.UI
 
         private void HandleContinue()
         {
+            PlayMenuSound();
             // Continue from highest wave reached - score is already saved in SaveManager
             SceneManager.LoadScene("Game");
         }
-        
+
         private void HandleOptions()
         {
+            PlayMenuSound();
             ShowOptions();
         }
-        
+
         private void HandleQuit()
         {
+            // Disable button to prevent multiple clicks
+            if (quitButton != null)
+            {
+                quitButton.interactable = false;
+            }
+
+            PlayMenuSound();
+            StartCoroutine(QuitAfterDelay());
+        }
+
+        private IEnumerator QuitAfterDelay()
+        {
+            // Wait for sound to play
+            yield return new WaitForSeconds(quitDelay);
+
             #if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;
             #else
@@ -171,13 +197,23 @@ namespace ITWaves.UI
 
         public void HandleBackToMenu()
         {
+            PlayMenuSound();
             ShowMainMenu();
         }
 
         private void HandleDeleteSave()
         {
+            PlayMenuSound();
             // Show confirmation dialog
             ShowConfirmationDialog("ARE YOU SURE?");
+        }
+
+        private void PlayMenuSound()
+        {
+            if (MusicManager.Instance != null && menuClickSound != null)
+            {
+                MusicManager.Instance.PlayUISound(menuClickSound);
+            }
         }
 
         private void ShowConfirmationDialog(string message)
@@ -215,6 +251,7 @@ namespace ITWaves.UI
 
         private void HandleConfirmYes()
         {
+            PlayMenuSound();
             // Delete the save
             SaveManager.DeleteSave();
             Debug.Log("Save data deleted successfully");
@@ -231,6 +268,7 @@ namespace ITWaves.UI
 
         private void HandleConfirmNo()
         {
+            PlayMenuSound();
             // Just hide the confirmation dialog
             HideConfirmationDialog();
         }
