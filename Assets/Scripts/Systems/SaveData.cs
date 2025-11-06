@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace ITWaves.Systems
 {
@@ -14,12 +15,14 @@ namespace ITWaves.Systems
         public float musicVolume = 1f;
         public float mouseSensitivity = 1f;
         public int qualityLevel = 2;
-        public bool treasureCollected = false; // Track if treasure box was collected in current run
+
+        public List<int> collectedTreasures = new List<int>();
+
         public float fireRateBoost = 0f; // Track accumulated fire rate boost from treasure boxes
+        public bool snakePauseEnabled = false; // Track if player has snake pause ability (treasure 3)
 
         public SaveData()
         {
-            // Default values
             highestWaveReached = 1;
             currentScore = 0;
             deathScore = 0;
@@ -29,8 +32,9 @@ namespace ITWaves.Systems
             musicVolume = 1f;
             mouseSensitivity = 1f;
             qualityLevel = 2;
-            treasureCollected = false;
+            collectedTreasures = new List<int>();
             fireRateBoost = 0f;
+            snakePauseEnabled = false;
         }
     }
 }

@@ -112,30 +112,74 @@ namespace ITWaves.Systems
             cachedSaveData.currentScore = 0;
             cachedSaveData.deathScore = 0;
             cachedSaveData.deathWave = 1;
-            cachedSaveData.treasureCollected = false; // Reset treasure status on new game
+            cachedSaveData.collectedTreasures.Clear(); // Clear all collected treasures
             cachedSaveData.fireRateBoost = 0f; // Reset fire rate boost on new game
+            cachedSaveData.snakePauseEnabled = false; // Reset snake pause ability
             Save(cachedSaveData);
         }
 
-        public static bool IsTreasureCollected()
+        public static bool IsTreasureCollected(int treasureNumber)
         {
             if (cachedSaveData == null)
             {
                 cachedSaveData = Load();
             }
-            return cachedSaveData.treasureCollected;
+            return cachedSaveData.collectedTreasures.Contains(treasureNumber);
         }
 
-        public static void SetTreasureCollected(bool collected)
+        public static void SetTreasureCollected(int treasureNumber)
         {
             if (cachedSaveData == null)
             {
                 cachedSaveData = Load();
             }
 
-            Debug.Log($"Setting treasure collected: {collected}");
-            cachedSaveData.treasureCollected = collected;
-            Save(cachedSaveData);
+            if (!cachedSaveData.collectedTreasures.Contains(treasureNumber))
+            {
+                cachedSaveData.collectedTreasures.Add(treasureNumber);
+                Debug.Log($"Treasure {treasureNumber} collected! Total treasures: {cachedSaveData.collectedTreasures.Count}");
+                Save(cachedSaveData);
+            }
+        }
+
+        public static int GetHighestTreasureCollected()
+        {
+            if (cachedSaveData == null)
+            {
+                cachedSaveData = Load();
+            }
+
+            if (cachedSaveData.collectedTreasures.Count == 0)
+            {
+                return 0;
+            }
+
+            int highest = 0;
+            foreach (int treasureNum in cachedSaveData.collectedTreasures)
+            {
+                if (treasureNum > highest)
+                {
+                    highest = treasureNum;
+                }
+            }
+            return highest;
+        }
+
+        public static bool HasAllTreasuresUpTo(int upToTreasureNumber)
+        {
+            if (cachedSaveData == null)
+            {
+                cachedSaveData = Load();
+            }
+
+            for (int i = 1; i <= upToTreasureNumber; i++)
+            {
+                if (!cachedSaveData.collectedTreasures.Contains(i))
+                {
+                    return false;
+                }
+            }
+            return true;
         }
 
         public static float GetFireRateBoost()
@@ -156,6 +200,27 @@ namespace ITWaves.Systems
 
             cachedSaveData.fireRateBoost += boost;
             Debug.Log($"Fire rate boost increased by {boost}. Total boost: {cachedSaveData.fireRateBoost}");
+            Save(cachedSaveData);
+        }
+
+        public static bool IsSnakePauseEnabled()
+        {
+            if (cachedSaveData == null)
+            {
+                cachedSaveData = Load();
+            }
+            return cachedSaveData.snakePauseEnabled;
+        }
+
+        public static void SetSnakePauseEnabled(bool enabled)
+        {
+            if (cachedSaveData == null)
+            {
+                cachedSaveData = Load();
+            }
+
+            cachedSaveData.snakePauseEnabled = enabled;
+            Debug.Log($"Snake pause ability set to: {enabled}");
             Save(cachedSaveData);
         }
 

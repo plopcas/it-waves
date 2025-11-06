@@ -35,6 +35,7 @@ namespace ITWaves.Snake
         private int stepsUntilNextZag = 5;
         private bool isRetreating = false;
         private bool isVisible = false; // Track if snake has been spawned yet
+        private int pauseClicksRemaining = 0; // Number of clicks/moves to pause for
 
         public bool IsAlive => segments.Count > 0 || gameObject != null;
         public int SegmentCount => segments.Count;
@@ -191,9 +192,23 @@ namespace ITWaves.Snake
             }
         }
         
+        public void PauseForClicks(int clickCount)
+        {
+            pauseClicksRemaining = clickCount;
+            Debug.Log($"[SnakeController] Snake paused for {clickCount} clicks");
+        }
+
         private void TakeStep()
         {
             if (GridManager.Instance == null) return;
+
+            // Check if snake is paused
+            if (pauseClicksRemaining > 0)
+            {
+                pauseClicksRemaining--;
+                Debug.Log($"[SnakeController] Snake paused, {pauseClicksRemaining} clicks remaining");
+                return; // Skip this step
+            }
 
             // If retreating, walk back the path
             if (isRetreating)

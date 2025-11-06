@@ -15,11 +15,18 @@ namespace ITWaves.UI
         private TextMeshProUGUI scoreText;
 
         [Header("Message Display")]
+        [SerializeField, Tooltip("Message bar panel (parent of message text).")]
+        private GameObject messageBar;
+
         [SerializeField, Tooltip("Center message text (for power-ups, etc).")]
         private TextMeshProUGUI messageText;
 
         [SerializeField, Tooltip("Message display duration.")]
         private float messageDuration = 1f;
+
+        [Header("Upgrade Display")]
+        [SerializeField, Tooltip("Upgrade indicator text (bottom left).")]
+        private TextMeshProUGUI upgradeText;
 
         private int currentScore;
         private Coroutine messageCoroutine;
@@ -46,11 +53,14 @@ namespace ITWaves.UI
                 SetScore(0);
             }
 
-            // Hide message text initially
-            if (messageText != null)
+            // Hide message bar initially
+            if (messageBar != null)
             {
-                messageText.gameObject.SetActive(false);
+                messageBar.SetActive(false);
             }
+
+            // Update upgrade display
+            UpdateUpgradeDisplay();
         }
 
         public void SetWave(int waveNumber)
@@ -102,14 +112,53 @@ namespace ITWaves.UI
 
         private IEnumerator ShowMessageRoutine(string message)
         {
-            messageText.text = message;
-            messageText.gameObject.SetActive(true);
+            // Show the message bar panel
+            if (messageBar != null)
+            {
+                messageBar.SetActive(true);
+            }
+
+            // Set the message text
+            if (messageText != null)
+            {
+                messageText.text = message;
+            }
 
             // Use WaitForSecondsRealtime so it works even when game is paused
             yield return new WaitForSecondsRealtime(messageDuration);
 
-            messageText.gameObject.SetActive(false);
+            // Hide the message bar panel
+            if (messageBar != null)
+            {
+                messageBar.SetActive(false);
+            }
+
             messageCoroutine = null;
+
+            // Update upgrade display after treasure collection message
+            UpdateUpgradeDisplay();
+        }
+
+        public void UpdateUpgradeDisplay()
+        {
+            if (upgradeText == null) return;
+
+            int highestTreasure = Systems.SaveManager.GetHighestTreasureCollected();
+
+            if (highestTreasure == 0)
+            {
+                upgradeText.text = "";
+            }
+            else
+            {
+                string boxes = "";
+                for (int i = 0; i < highestTreasure; i++)
+                {
+                    boxes += "■ ";
+                }
+
+                upgradeText.text = $"UPGRADES: {boxes.TrimEnd()}";
+            }
         }
 
         private void OnDestroy()

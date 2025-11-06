@@ -18,7 +18,11 @@ namespace ITWaves.Props
         [Header("Power-up Settings")]
         [SerializeField, Tooltip("Fire rate increase amount (shots per second).")]
         private float fireRateBoost = 1f;
-        
+
+        [Header("Treasure Identity")]
+        [SerializeField, Tooltip("Treasure number (1, 2, 3, etc.). Set by spawner.")]
+        private int treasureNumber = 1;
+
         [Header("Visual Feedback")]
         [SerializeField, Tooltip("Sprite renderer.")]
         private SpriteRenderer spriteRenderer;
@@ -46,7 +50,7 @@ namespace ITWaves.Props
         private HitFlash hitFlash;
         
         public bool IsAlive => currentHits < maxHits;
-        
+
         private void Awake()
         {
             currentHits = 0;
@@ -58,6 +62,16 @@ namespace ITWaves.Props
 
             hitFlash = GetComponent<HitFlash>();
             UpdateVisual();
+        }
+
+        /// <summary>
+        /// Set the treasure number for this treasure box.
+        /// Called by the spawner when the treasure is created.
+        /// </summary>
+        public void SetTreasureNumber(int number)
+        {
+            treasureNumber = number;
+            Debug.Log($"[TreasureBox] Treasure number set to {treasureNumber}");
         }
         
         public void ApplyDamage(float amount, GameObject source = null)
@@ -134,9 +148,25 @@ namespace ITWaves.Props
                 yield break;
             }
 
-            // Mark treasure as collected in save data and save the fire rate boost
-            SaveManager.SetTreasureCollected(true);
-            SaveManager.AddFireRateBoost(fireRateBoost);
+            // Mark treasure as collected in save data
+            SaveManager.SetTreasureCollected(treasureNumber);
+
+            // Treasure 3 grants snake pause ability, treasures 1 and 2 grant fire rate boost
+            string powerUpMessage = "";
+            if (treasureNumber == 3)
+            {
+                // Treasure 3: Enable snake pause ability
+                SaveManager.SetSnakePauseEnabled(true);
+                powerUpMessage = "STUN GUN";
+                Debug.Log($"[TreasureBox] Treasure 3 collected! Snake pause ability enabled");
+            }
+            else
+            {
+                // Treasures 1 and 2: Increase fire rate
+                SaveManager.AddFireRateBoost(fireRateBoost);
+                powerUpMessage = "FIRE RATE INCREASED";
+                Debug.Log($"[TreasureBox] Treasure {treasureNumber} collected! Fire rate boost: {fireRateBoost}");
+            }
 
             // Pause the game
             float originalTimeScale = Time.timeScale;
@@ -154,19 +184,23 @@ namespace ITWaves.Props
                 Debug.Log($"[TreasureBox] Playing collect sound: {collectSound.name}");
             }
 
-            // Show message on HUD
+            // Show message on HUD with treasure number
             var hud = FindFirstObjectByType<UI.HUDController>();
             if (hud != null)
             {
-                hud.ShowMessage("FIRE RATE INCREASED");
+                hud.ShowMessage(powerUpMessage);
             }
 
             // Wait for 1 second (real time, not affected by time scale)
             yield return new WaitForSecondsRealtime(1f);
 
-            // Increase fire rate
-            shooter.IncreaseFireRate(fireRateBoost);
-            Debug.Log($"[TreasureBox] Treasure collected! New fire rate: {shooter.GetFireRate()} shots/sec");
+            // Apply the power-up effect
+            if (treasureNumber != 3)
+            {
+                // Increase fire rate for treasures 1 and 2
+                shooter.IncreaseFireRate(fireRateBoost);
+                Debug.Log($"[TreasureBox] New fire rate: {shooter.GetFireRate()} shots/sec");
+            }
 
             // Resume the game
             Time.timeScale = originalTimeScale;

@@ -30,6 +30,15 @@ namespace ITWaves.Player
         private float nextFireTime;
         private bool isFiring;
         private bool hasFiredThisPress;
+
+        [Header("Snake Pause (Treasure 3)")]
+        [SerializeField, Tooltip("Number of shots before triggering snake pause.")]
+        private int shotsPerPause = 5;
+
+        [SerializeField, Tooltip("Number of clicks/moves to pause snake for.")]
+        private int pauseClickCount = 2;
+
+        private int shotsSincePause = 0; // Track shots since last pause
         
         private void Awake()
         {
@@ -129,6 +138,34 @@ namespace ITWaves.Player
             if (audioSource != null && shootSound != null)
             {
                 audioSource.PlayOneShot(shootSound);
+            }
+
+            // Check if snake pause ability is enabled (treasure 3)
+            if (SaveManager.IsSnakePauseEnabled())
+            {
+                shotsSincePause++;
+
+                // Every 5 shots, pause the snake
+                if (shotsSincePause >= shotsPerPause)
+                {
+                    shotsSincePause = 0;
+                    TriggerSnakePause();
+                }
+            }
+        }
+
+        private void TriggerSnakePause()
+        {
+            // Find the snake and pause it
+            var snake = FindFirstObjectByType<Snake.SnakeController>();
+            if (snake != null)
+            {
+                snake.PauseForClicks(pauseClickCount);
+                Debug.Log($"[PlayerShooter] Snake paused for {pauseClickCount} clicks!");
+            }
+            else
+            {
+                Debug.LogWarning("[PlayerShooter] Snake not found, cannot pause!");
             }
         }
 
