@@ -930,6 +930,7 @@ GameObject:
   - component: {fileID: 1422751853}
   - component: {fileID: 1422751852}
   - component: {fileID: 1422751857}
+  - component: {fileID: 1422751858}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -1076,6 +1077,25 @@ MonoBehaviour:
   cellSize: 1
   margin: 0.5
   mainCamera: {fileID: 1361852322}
+--- !u!114 &1422751858
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1422751848}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8166b2b3c3619dd4e991f680ff7a9e63, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ITWaves.Runtime::ITWaves.Level.FogManager
+  fogPrefab: {fileID: 2737393799336630263, guid: 5d74980bf413d364b9040ef793de5631, type: 3}
+  fogWaveMilestones: 03000000070000000c00000011000000
+  fogDepthAtMilestone: 01000000020000000300000004000000
+  firstFogMessage: THE AIR THICKENS
+  subsequentFogMessage: THE FOG CLOSES IN
+  fogSortingLayer: Default
+  fogSortingOrder: 100
 --- !u!1 &1633487265
 GameObject:
   m_ObjectHideFlags: 0
