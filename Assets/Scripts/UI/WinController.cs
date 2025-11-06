@@ -3,17 +3,16 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using TMPro;
 using ITWaves.Systems;
+using System.Collections;
+using UnityEngine.InputSystem;
 
 namespace ITWaves.UI
 {
     public class WinController : MonoBehaviour
     {
         [Header("Buttons")]
-        [SerializeField, Tooltip("Credits button - show game credits.")]
-        private Button creditsButton;
-
-        [SerializeField, Tooltip("Main menu button - return to main menu.")]
-        private Button mainMenuButton;
+        [SerializeField, Tooltip("Return to title button - return to boot scene after credits.")]
+        private Button returnToTitleButton;
 
         [Header("Panels")]
         [SerializeField, Tooltip("Stats panel - shows game statistics.")]
@@ -42,54 +41,87 @@ namespace ITWaves.UI
         private TextMeshProUGUI skitterersKilledText;
 
         [Header("Credits Display")]
-        [SerializeField, Tooltip("Credits text.")]
-        private TextMeshProUGUI creditsText;
+        [SerializeField, Tooltip("Credits scroll container - parent that moves up.")]
+        private RectTransform creditsScrollContainer;
 
-        [SerializeField, Tooltip("Back button in credits panel.")]
-        private Button creditsBackButton;
+        [SerializeField, Tooltip("Thank you text.")]
+        private TextMeshProUGUI thankYouText;
+
+        [SerializeField, Tooltip("Game by text.")]
+        private TextMeshProUGUI gameByText;
+
+        [SerializeField, Tooltip("Canvas group for fade out effect.")]
+        private CanvasGroup creditsCanvasGroup;
+
+        [Header("Timing")]
+        [SerializeField, Tooltip("Time to show stats before auto-showing credits.")]
+        private float statsDisplayTime = 5f;
+
+        [SerializeField, Tooltip("Time to pause on each credit section.")]
+        private float creditsPauseTime = 2.5f;
+
+        [SerializeField, Tooltip("Speed of credits scrolling.")]
+        private float scrollSpeed = 100f;
+
+        [SerializeField, Tooltip("Speed multiplier when shoot button is held.")]
+        private float fastScrollMultiplier = 3f;
+
+        [SerializeField, Tooltip("Fade out duration.")]
+        private float fadeOutDuration = 1f;
 
         [Header("Audio")]
         [SerializeField, Tooltip("Sound to play when clicking menu buttons.")]
         private AudioClip menuClickSound;
 
-        private const string CREDITS_TEXT = @"IT-WAVES
-
-GAME DESIGN & PROGRAMMING
-[Your Name]
-
-SPECIAL THANKS
-Unity Technologies
-Augment Code
-
-Thank you for playing!";
+        private bool creditsSequenceRunning = false;
+        private bool isSkipping = false;
 
         private void Start()
         {
             // Setup buttons
-            if (creditsButton != null)
+            if (returnToTitleButton != null)
             {
-                creditsButton.onClick.AddListener(HandleShowCredits);
-            }
-
-            if (mainMenuButton != null)
-            {
-                mainMenuButton.onClick.AddListener(HandleMainMenu);
-            }
-
-            if (creditsBackButton != null)
-            {
-                creditsBackButton.onClick.AddListener(HandleBackToStats);
+                returnToTitleButton.onClick.AddListener(HandleReturnToTitle);
+                returnToTitleButton.gameObject.SetActive(false); // Hidden initially
             }
 
             // Set credits text
-            if (creditsText != null)
+            if (thankYouText != null)
             {
-                creditsText.text = CREDITS_TEXT;
+                thankYouText.text = "THANK YOU FOR PLAYING";
+            }
+
+            if (gameByText != null)
+            {
+                gameByText.text = "A GAME BY\nPEDRO LOPEZ";
             }
 
             // Display stats and show stats panel
             DisplayFinalStats();
             ShowStatsPanel();
+
+            // Start automatic credits sequence after delay
+            StartCoroutine(AutoShowCreditsSequence());
+        }
+
+        private void Update()
+        {
+            // Check for shoot button input to speed up credits
+            if (creditsSequenceRunning)
+            {
+                // Check for shoot input using new Input System (left mouse button or space)
+                bool isMousePressed = Mouse.current != null && Mouse.current.leftButton.isPressed;
+                bool isSpacePressed = Keyboard.current != null && Keyboard.current.spaceKey.isPressed;
+
+                if (isMousePressed || isSpacePressed)
+                {
+                    isSkipping = true;
+                }
+                else
+                {
+                    isSkipping = false;
+                }
+            }
         }
 
         private void DisplayFinalStats()
@@ -152,22 +184,113 @@ Thank you for playing!";
             }
         }
 
-        private void HandleShowCredits()
+        private IEnumerator AutoShowCreditsSequence()
         {
-            PlayMenuSound();
+            // Wait for stats display time
+            yield return new WaitForSeconds(statsDisplayTime);
+
+            // Hide stats panel and show credits panel
             ShowCreditsPanel();
+
+            // Start credits sequence
+            yield return StartCoroutine(PlayCreditsSequence());
         }
 
-        private void HandleMainMenu()
+        private IEnumerator PlayCreditsSequence()
         {
-            PlayMenuSound();
-            SceneManager.LoadScene("MainMenu");
+            creditsSequenceRunning = true;
+
+            // Make sure all credits are initially visible
+            if (creditsCanvasGroup != null)
+            {
+                creditsCanvasGroup.alpha = 1f;
+            }
+
+            // Position credits at starting position
+            if (creditsScrollContainer != null)
+            {
+                Vector2 startPos = creditsScrollContainer.anchoredPosition;
+                float currentY = startPos.y;
+
+                // Show "THANK YOU FOR PLAYING" - pause first, then scroll
+                if (thankYouText != null)
+                {
+                    yield return new WaitForSeconds(GetPauseTime()); // Pause on first text
+                    float targetY = currentY + GetScrollDistanceToCenter(thankYouText.rectTransform);
+                    yield return StartCoroutine(ScrollToPosition(currentY, targetY));
+                    currentY = targetY;
+                }
+
+                // Show "A GAME BY PEDRO LOPEZ" - scroll to center then pause
+                if (gameByText != null)
+                {
+                    float targetY = currentY + GetScrollDistanceToCenter(gameByText.rectTransform);
+                    yield return StartCoroutine(ScrollToPosition(currentY, targetY));
+                    currentY = targetY;
+                    yield return new WaitForSeconds(GetPauseTime());
+                }
+            }
+
+            // Fade out credits
+            if (creditsCanvasGroup != null)
+            {
+                float elapsed = 0f;
+                while (elapsed < fadeOutDuration)
+                {
+                    elapsed += Time.deltaTime * (isSkipping ? fastScrollMultiplier : 1f);
+                    creditsCanvasGroup.alpha = Mathf.Lerp(1f, 0f, elapsed / fadeOutDuration);
+                    yield return null;
+                }
+                creditsCanvasGroup.alpha = 0f;
+            }
+
+            // Show "Return to Title" button
+            if (returnToTitleButton != null)
+            {
+                returnToTitleButton.gameObject.SetActive(true);
+            }
+
+            creditsSequenceRunning = false;
         }
 
-        private void HandleBackToStats()
+        private IEnumerator ScrollToPosition(float startY, float targetY)
+        {
+            if (creditsScrollContainer == null) yield break;
+
+            float distance = targetY - startY;
+            float duration = Mathf.Abs(distance) / scrollSpeed;
+            float elapsed = 0f;
+
+            while (elapsed < duration)
+            {
+                float speedMultiplier = isSkipping ? fastScrollMultiplier : 1f;
+                elapsed += Time.deltaTime * speedMultiplier;
+                float t = Mathf.Clamp01(elapsed / duration);
+                float currentY = Mathf.Lerp(startY, targetY, t);
+                creditsScrollContainer.anchoredPosition = new Vector2(creditsScrollContainer.anchoredPosition.x, currentY);
+                yield return null;
+            }
+
+            creditsScrollContainer.anchoredPosition = new Vector2(creditsScrollContainer.anchoredPosition.x, targetY);
+        }
+
+        private float GetScrollDistanceToCenter(RectTransform textRect)
+        {
+            // Calculate distance needed to scroll to center the text on screen
+            // This is a simplified version - adjust based on your UI layout
+            return 300f; // Adjust this value based on spacing between credits
+        }
+
+        private float GetPauseTime()
+        {
+            // Return reduced pause time if skipping
+            return isSkipping ? creditsPauseTime / fastScrollMultiplier : creditsPauseTime;
+        }
+
+        private void HandleReturnToTitle()
         {
             PlayMenuSound();
-            ShowStatsPanel();
+            SceneManager.LoadScene("Boot");
         }
 
         private void ShowStatsPanel()
