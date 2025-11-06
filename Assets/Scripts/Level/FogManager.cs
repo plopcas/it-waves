@@ -3,10 +3,8 @@ using System.Collections.Generic;
 
 namespace ITWaves.Level
 {
-    /// <summary>
     /// Manages fog that progressively closes in from the edges as waves increase.
     /// Fog spawns at specific wave milestones and covers more edge cells each time.
-    /// </summary>
     public class FogManager : MonoBehaviour
     {
         public static FogManager Instance { get; private set; }
@@ -89,9 +87,8 @@ namespace ITWaves.Level
             }
         }
 
-        /// <summary>
+
         /// Determines the fog depth for a given wave based on milestones.
-        /// </summary>
         private int GetFogDepthForWave(int waveNumber)
         {
             int depth = 0;
@@ -112,9 +109,7 @@ namespace ITWaves.Level
             return depth;
         }
 
-        /// <summary>
         /// Spawns fog at all edge cells up to the current fog depth.
-        /// </summary>
         private void SpawnFog()
         {
             if (fogPrefab == null)
@@ -183,9 +178,7 @@ namespace ITWaves.Level
             Debug.Log($"[FogManager] Spawned {spawnedFogObjects.Count} fog objects at depth {currentFogDepth}");
         }
 
-        /// <summary>
         /// Spawns a single fog object at the specified grid position.
-        /// </summary>
         private void SpawnFogAtGridPosition(int gridX, int gridY)
         {
             var grid = Core.GridManager.Instance;
@@ -204,9 +197,7 @@ namespace ITWaves.Level
             spawnedFogObjects.Add(fogObject);
         }
 
-        /// <summary>
         /// Clears all spawned fog objects.
-        /// </summary>
         private void ClearFog()
         {
             foreach (var fogObject in spawnedFogObjects)
@@ -219,9 +210,7 @@ namespace ITWaves.Level
             spawnedFogObjects.Clear();
         }
 
-        /// <summary>
         /// Shows the appropriate fog message via HUD.
-        /// </summary>
         private void ShowFogMessage()
         {
             var hud = FindFirstObjectByType<UI.HUDController>();
@@ -237,17 +226,13 @@ namespace ITWaves.Level
             }
         }
 
-        /// <summary>
         /// Public method to manually trigger fog update (useful for testing).
-        /// </summary>
         public void UpdateFog(int waveNumber)
         {
             HandleWaveStarted(waveNumber);
         }
 
-        /// <summary>
         /// Resets fog state (useful when restarting game).
-        /// </summary>
         public void ResetFog()
         {
             currentFogDepth = 0;
