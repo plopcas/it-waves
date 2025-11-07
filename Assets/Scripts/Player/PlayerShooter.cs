@@ -97,12 +97,14 @@ namespace ITWaves.Player
                 return;
             }
 
-            // Check if mouse button is still held using the new Input System
+            // Check if mouse button or touch is still held using the new Input System
             bool isMouseButtonHeld = UnityEngine.InputSystem.Mouse.current != null &&
                                      UnityEngine.InputSystem.Mouse.current.leftButton.isPressed;
+            bool isTouchHeld = UnityEngine.InputSystem.Touchscreen.current != null &&
+                              UnityEngine.InputSystem.Touchscreen.current.primaryTouch.press.isPressed;
 
-            // If button is no longer held, stop firing
-            if (isFiring && !isMouseButtonHeld)
+            // If button/touch is no longer held, stop firing
+            if (isFiring && !isMouseButtonHeld && !isTouchHeld)
             {
                 isFiring = false;
                 hasFiredThisPress = false;
