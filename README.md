@@ -25,7 +25,7 @@ A retro survavial horror game where you hunt a single snake-like monstrosity acr
 Hidden **Treasure Boxes** spawn throughout the game.
 
 ### Environmental Hazards
-- **Destructible Boxes**: Spawn when the snake is hit; block movement and can be destroyed for points
+- **Destructible Boxes**: Block movement and can be destroyed for points.
 - **Closing Fog**: Progressively shrinks the playable area.
 
 ## Controls
