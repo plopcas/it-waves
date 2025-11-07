@@ -2,6 +2,8 @@
 
 A retro survavial horror game where you hunt a single snake-like monstrosity across 20 procedurally generated waves. The snake escapes when damaged enough (waves 1-19), forcing you to chase it through increasingly difficult arenas. On Wave 20, you finally defeat it.
 
+<img src="https://github.com/plopcas/it-waves/blob/main/Images/game-cover-variant.png" width="500">
+
 ## Game Overview
 
 **IT-Waves** is a top-down arcade survival horror shooter inspired by classic games like Centipede. You're frozen in fear at the center of the screen, able only to aim and shoot as a sinister snake and its minions close in. Each wave increases the difficulty—more enemies, closing fog, and a relentless snake that won't stop until Wave 20.
