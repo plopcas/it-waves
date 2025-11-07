@@ -30,10 +30,14 @@ Hidden **Treasure Boxes** spawn throughout the game.
 
 ## Controls
 
-### Keyboard & Mouse
+### Desktop - Keyboard & Mouse
 - **Aim**: Mouse
-- **Fire**: Left Mouse Button (hold for automatic fire)
+- **Fire**: Left Mouse Button
 - **Pause**: Escape
+
+### Mobile Web - Tap
+
+- **Aim & Fire**: Tap
 
 ## License
 
